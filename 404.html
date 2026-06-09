@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>Not found — Sebastian Schenk</title>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
+    <link rel="stylesheet" href="/src/css/main.css?v=2" />
+    <script src="/src/js/theme.js?v=1"></script>
+    <style>
+      .nf {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 32px;
+      }
+      .nf__code {
+        font-family: var(--font-mono);
+        color: var(--accent);
+        font-size: 4rem;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .nf__msg {
+        margin: 16px 0 28px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="nf">
+      <div>
+        <p class="nf__code">404</p>
+        <p class="nf__msg">That page doesn't exist. Probably never did.</p>
+        <a class="btn btn--primary" href="/">Back to home</a>
+      </div>
+    </main>
+  </body>
+</html>

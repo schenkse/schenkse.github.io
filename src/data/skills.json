@@ -1,0 +1,11 @@
+{
+  "Research areas": [
+    "Quantum field theory",
+    "Nonperturbative methods",
+    "Asymptotics and resurgence",
+    "Light dark matter in condensed matter"
+  ],
+  "Languages and tools": ["Python", "Julia", "TypeScript", "Tensor networks", "Qiskit"],
+  "Scientific computing": ["NumPy", "SciPy", "JAX", "Mathematica", "CUDA"],
+  "Currently learning": ["Backend engineering", "Edge computing"]
+}
