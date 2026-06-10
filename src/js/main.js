@@ -214,6 +214,15 @@
       if (e.key === "Escape" && isOpen()) close(true);
     });
 
+    // Leaving the mobile breakpoint reflows the nav back to a desktop row, so
+    // clear any open-menu state (aria-expanded, .is-open, the focus trap) that
+    // would otherwise go stale. 720px matches the .nav-toggle media query in CSS.
+    window
+      .matchMedia("(max-width: 720px)")
+      .addEventListener("change", (e) => {
+        if (!e.matches) close(false);
+      });
+
     // Trap focus within the open mobile menu.
     nav.addEventListener("keydown", (e) => {
       if (e.key !== "Tab" || !isOpen()) return;
