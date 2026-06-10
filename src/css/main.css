@@ -1159,13 +1159,18 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
     transform: translateY(-12px);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--t-fast), transform var(--t-fast);
+    /* visibility (not just opacity) so the closed menu's links leave the tab
+       order; transitioning it keeps visible until the fade-out finishes. */
+    visibility: hidden;
+    transition: opacity var(--t-fast), transform var(--t-fast),
+      visibility var(--t-fast);
   }
 
   .primary-nav.is-open {
     transform: none;
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
   }
 
   .primary-nav ul {
