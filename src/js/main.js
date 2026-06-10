@@ -369,7 +369,7 @@
     list.innerHTML = "";
     if (!items.length) {
       const li = document.createElement("li");
-      li.className = "pub-list__empty";
+      li.className = "empty-state";
       li.textContent = "No publications match this filter.";
       list.appendChild(li);
       count.textContent = "";
@@ -447,7 +447,7 @@
     } catch (err) {
       console.error("Failed to load publications:", err);
       list.innerHTML =
-        '<li class="pub-list__empty">Publications couldn\'t load. ' +
+        '<li class="empty-state">Publications couldn\'t load. ' +
         "If you opened this file directly, run a local server.</li>";
       return;
     }

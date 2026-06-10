@@ -736,8 +736,6 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
   text-decoration: none;
 }
 
-.pub-list__empty,
-.project-grid__empty,
 .empty-state {
   padding: 22px 0;
   color: var(--muted);
