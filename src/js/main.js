@@ -20,8 +20,8 @@
  *   - Build all JSON-derived hrefs via safeUrl() so unsafe schemes are neutralized.
  *   - The initial theme is set by an inline <head> script in index.html (pre-paint
  *     to avoid a flash); this file only wires up the toggle and live OS changes.
- *   - Bump the `?v=` query on the <script> tag in index.html when changing this
- *     file, to bust the browser cache.
+ *   - Assets carry no cache-busting query: GitHub Pages serves them with a short
+ *     max-age, so a deploy propagates to returning visitors within minutes.
  */
 (() => {
   "use strict";
@@ -41,9 +41,9 @@
   /**
    * Fetch + parse a same-origin JSON file. Throws on a non-OK HTTP status;
    * callers render their own error UI. Must stay same-origin (the CSP in
-   * index.html only allows same-origin connect-src). Freshness is handled by the
-   * `?v=` query on the caller's path (bump it when the data changes), so the
-   * browser cache can be used without a revalidation round-trip on every load.
+   * index.html only allows same-origin connect-src). No cache-busting query:
+   * GitHub Pages' short max-age means edited data reaches returning visitors
+   * within minutes, so the browser cache can be used as-is.
    * @param {string} path - Same-origin path to a JSON file.
    * @returns {Promise<any>} Parsed JSON.
    */
@@ -443,7 +443,7 @@
 
     let data;
     try {
-      data = await loadJSON("src/data/publications.json?v=1");
+      data = await loadJSON("src/data/publications.json");
     } catch (err) {
       console.error("Failed to load publications:", err);
       list.innerHTML =
@@ -576,7 +576,7 @@
 
     let data;
     try {
-      data = await loadJSON("src/data/projects.json?v=1");
+      data = await loadJSON("src/data/projects.json");
     } catch (err) {
       console.error("Failed to load projects:", err);
       grid.innerHTML =
@@ -744,7 +744,7 @@
 
     let data;
     try {
-      data = await loadJSON("src/data/skills.json?v=1");
+      data = await loadJSON("src/data/skills.json");
     } catch (err) {
       console.error("Failed to load skills:", err);
       root.innerHTML = '<p class="empty-state">Skills couldn\'t load.</p>';
