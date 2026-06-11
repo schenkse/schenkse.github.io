@@ -1,11 +1,12 @@
 {
-  "Research areas": [
+  "Research": [
     "Quantum field theory",
     "Nonperturbative methods",
-    "Asymptotics and resurgence",
-    "Light dark matter in condensed matter"
+    "Resurgence",
+    "Light dark matter",
+    "Skyrmions in chiral magnets"
   ],
-  "Languages and tools": ["Python", "Julia", "TypeScript", "Tensor networks", "Qiskit"],
-  "Scientific computing": ["NumPy", "SciPy", "JAX", "Mathematica", "CUDA"],
-  "Currently learning": ["Backend engineering", "Edge computing"]
+  "Languages and tools": ["Python", "Julia", "TypeScript", "Wolfram", "Tensor networks"],
+  "Scientific computing": ["NumPy", "SciPy", "JAX", "Mathematica", "CUDA", "Qiskit", "ITensors"],
+  "Currently learning": ["Agentic workflows for research", "Edge computing"]
 }
