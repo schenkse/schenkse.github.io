@@ -8,5 +8,5 @@
   ],
   "Languages and tools": ["Python", "Julia", "TypeScript", "Wolfram", "Tensor networks"],
   "Scientific computing": ["NumPy", "SciPy", "JAX", "Mathematica", "CUDA", "Qiskit", "ITensors"],
-  "Currently learning": ["Agentic workflows for research", "Edge computing"]
+  "Currently learning": ["Agentic workflows for research", "Topological edge states"]
 }
