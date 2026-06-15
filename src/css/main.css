@@ -600,7 +600,7 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
 .pub-filter.is-active {
   background: var(--accent-soft);
   border-color: var(--accent);
-  color: var(--text);
+  color: var(--accent);
 }
 
 .pub-year {
@@ -626,6 +626,12 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
 .pub-year__toggle[aria-expanded="true"] {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+.pub-year__toggle.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .pub-year__menu {

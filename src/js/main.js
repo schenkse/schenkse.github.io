@@ -512,7 +512,10 @@
         b.classList.toggle("is-active", active);
         b.setAttribute("aria-pressed", String(active));
       });
-      yearLabel.textContent = state.mode === "year" ? String(state.year) : "Year";
+      const yearActive = state.mode === "year";
+      yearToggle.classList.toggle("is-active", yearActive);
+      yearToggle.setAttribute("aria-pressed", String(yearActive));
+      yearLabel.textContent = yearActive ? String(state.year) : "Year";
     };
 
     filters.forEach((b) => {
