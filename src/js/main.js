@@ -86,6 +86,30 @@
     return base + v;
   };
 
+  /**
+   * Run a DOM update inside a same-document view transition when the API is
+   * available and motion is allowed; otherwise apply it synchronously.
+   * While the transition runs, `data-vt=<type>` is set on <html> so CSS can scope
+   * per-transition styling (see the "View transitions" section in main.css).
+   * Reads prefers-reduced-motion live (not the load-time snapshot) so a mid-session
+   * OS change is honored.
+   * @param {() => void} update - Mutates the DOM.
+   * @param {string} [type] - Optional transition label, mirrored to <html data-vt>.
+   * @returns {ViewTransition|null} The transition, or null when applied directly.
+   */
+  function withViewTransition(update, type) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || typeof document.startViewTransition !== "function") {
+      update();
+      return null;
+    }
+    const root = document.documentElement;
+    if (type) root.dataset.vt = type;
+    const vt = document.startViewTransition(update);
+    if (type) vt.finished.finally(() => delete root.dataset.vt);
+    return vt;
+  }
+
   /* ----------------------------------------------------------
    *  Theme toggle
    * ---------------------------------------------------------- */
@@ -107,14 +131,35 @@
       btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
     };
     sync();
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
       const cur = document.documentElement.getAttribute("data-theme");
       const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      try {
-        localStorage.setItem("theme", next);
-      } catch (_) {}
-      sync();
+      const apply = () => {
+        document.documentElement.setAttribute("data-theme", next);
+        try {
+          localStorage.setItem("theme", next);
+        } catch (_) {}
+        sync();
+      };
+      const vt = withViewTransition(apply, "theme");
+      if (!vt) return;
+      // Sweep the new theme out as a circle from the click point; keyboard
+      // activation has no pointer coords, so fall back to the button's center.
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX || r.left + r.width / 2;
+      const y = e.clientY || r.top + r.height / 2;
+      const end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      vt.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              "circle(0 at " + x + "px " + y + "px)",
+              "circle(" + end + "px at " + x + "px " + y + "px)",
+            ],
+          },
+          { duration: 450, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
+        );
+      });
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -378,9 +423,14 @@
     count.textContent = items.length + " publication" + (items.length > 1 ? "s" : "");
 
     const frag = document.createDocumentFragment();
-    items.forEach((p) => {
+    items.forEach((p, idx) => {
       const li = document.createElement("li");
       li.className = "pub-list__item";
+      // Stable, unique custom-ident so a paper shown by two filters morphs to its
+      // new position across a view transition instead of cross-fading. arXiv ids are
+      // unique; fall back to DOI, then the list index.
+      li.style.viewTransitionName =
+        "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
 
       const year = document.createElement("span");
       year.className = "pub-list__year";
@@ -522,7 +572,7 @@
       b.addEventListener("click", () => {
         state = { mode: b.dataset.filter, year: null };
         writeUrl();
-        applyFilter();
+        withViewTransition(applyFilter, "pub");
       });
     });
 
@@ -548,7 +598,7 @@
       state = { mode: "year", year: Number(btn.dataset.year) };
       writeUrl();
       closeYearMenu(true);
-      applyFilter();
+      withViewTransition(applyFilter, "pub");
     });
     document.addEventListener("click", (e) => {
       if (!yearMenu.hidden && !e.target.closest(".pub-year")) closeYearMenu(false);

@@ -329,7 +329,9 @@ a:hover {
   width: 18px;
   height: 2px;
   background: var(--text);
-  transition: transform var(--t-fast), opacity var(--t-fast),
+  /* Slower transform than the other channels gives the bars a more deliberate
+     morph into the X. */
+  transition: transform var(--t-med), opacity var(--t-fast),
     background var(--t-fast);
 }
 
@@ -569,6 +571,12 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
   gap: 16px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+  /* Lift the controls (and the open year menu within) above the publication
+     items, which each create a stacking context via their view-transition-name
+     and would otherwise paint over the absolutely-positioned dropdown. Stays
+     below the sticky header (z-index: 50). */
+  position: relative;
+  z-index: 1;
 }
 
 .pub-filters {
@@ -1104,6 +1112,43 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
 }
 
 /* ============================================================
+   View transitions
+   Same-document transitions driven from main.js (withViewTransition). The
+   data-vt attribute on <html> scopes styling to one transition at a time.
+   ============================================================ */
+
+/* Theme toggle — the new theme is clipped in over the old by a JS-driven circle
+   (see initThemeToggle), so suppress the default root cross-fade and stack the
+   new snapshot above the old. */
+html[data-vt="theme"]::view-transition-old(root),
+html[data-vt="theme"]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-vt="theme"]::view-transition-new(root) {
+  z-index: 1;
+}
+html[data-vt="theme"]::view-transition-old(root) {
+  z-index: 0;
+}
+
+/* Publications filter — a touch slower than the UA default cross-fade/morph. */
+html[data-vt="pub"]::view-transition-group(*) {
+  animation-duration: 280ms;
+}
+
+/* The global reduced-motion rule targets *, ::before and ::after — it does NOT
+   match ::view-transition-* pseudo-elements, so disable them explicitly too.
+   (JS already skips startViewTransition under reduced motion; this is a net.) */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
    Mobile
    ============================================================ */
 
@@ -1160,14 +1205,14 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
     padding: 16px 24px 24px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    transform: translateY(-12px);
+    transform: translateY(-16px);
     opacity: 0;
     pointer-events: none;
     /* visibility (not just opacity) so the closed menu's links leave the tab
        order; transitioning it keeps visible until the fade-out finishes. */
     visibility: hidden;
-    transition: opacity var(--t-fast), transform var(--t-fast),
-      visibility var(--t-fast);
+    transition: opacity var(--t-med), transform var(--t-med),
+      visibility var(--t-med);
   }
 
   .primary-nav.is-open {
@@ -1186,6 +1231,42 @@ html[data-theme="dark"] .theme-toggle__icon--sun {
   .primary-nav a {
     padding: 12px 14px;
     font-size: 1rem;
+  }
+
+  /* Cascade the rows into view as the panel opens; they start nudged up and
+     fade/slide in with an increasing delay. Collapsed automatically under
+     reduced motion by the global rule that zeroes transition-duration. */
+  .primary-nav li a,
+  .primary-nav__actions {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity var(--t-med), transform var(--t-med),
+      color var(--t-fast), background var(--t-fast);
+  }
+
+  .primary-nav.is-open li a,
+  .primary-nav.is-open .primary-nav__actions {
+    opacity: 1;
+    transform: none;
+  }
+
+  .primary-nav.is-open li:nth-child(1) a {
+    transition-delay: 40ms;
+  }
+  .primary-nav.is-open li:nth-child(2) a {
+    transition-delay: 80ms;
+  }
+  .primary-nav.is-open li:nth-child(3) a {
+    transition-delay: 120ms;
+  }
+  .primary-nav.is-open li:nth-child(4) a {
+    transition-delay: 160ms;
+  }
+  .primary-nav.is-open li:nth-child(5) a {
+    transition-delay: 200ms;
+  }
+  .primary-nav.is-open .primary-nav__actions {
+    transition-delay: 220ms;
   }
 
   .primary-nav__actions {
