@@ -76,19 +76,18 @@
       </p>
 
       <h1>Sebastian Schenk</h1>
-      <p class="lede">Theoretical physicist — reverse-engineering nature, approximately.</p>
+      <p class="lede">
+        Theoretical physicist at the Karlsruhe Institute of Technology, and open to collaboration.
+      </p>
       <p>
         I work on quantum field theory and its less-tractable corners.
         Lately I'm bringing that same taste for hard problems and clean abstractions over to quantum information technology.
       </p>
-      <p class="standing">
-        Postdoctoral researcher at the Karlsruhe Institute of Technology, and open to collaboration.
-      </p>
       <p class="reach">
-        <a data-email="href" href="#">Email</a>
-        <a data-matrix="href" href="#">Matrix</a>
-        <a href="https://github.com/schenkse" rel="me noopener">GitHub</a>
-        <a href="https://inspirehep.net/authors/1706735" rel="me noopener">INSPIRE-HEP</a>
+        <a data-email="href" href="#">Email</a>&nbsp;·&nbsp;
+        <a data-matrix="href" href="#">Matrix</a>&nbsp;·&nbsp;
+        <a href="https://github.com/schenkse" rel="me noopener">GitHub</a>&nbsp;·&nbsp;
+        <a href="https://inspirehep.net/authors/1706735" rel="me noopener">INSPIRE-HEP</a>&nbsp;·&nbsp;
         <a href="https://orcid.org/0000-0002-9143-8870" rel="me noopener">ORCID</a>
       </p>
 
@@ -155,8 +154,17 @@
 
       <footer class="foot">
         <span>Hand-written HTML. No build step, no fonts to fetch.</span>
-        <span data-updated>updated September 2026</span>
-        <button class="theme-toggle" type="button" aria-pressed="false">Dark</button>
+        <!-- Both glyphs ship in the markup and CSS shows the one that matches the
+             current theme, so the button is correct before main.js runs. -->
+        <button
+          class="theme-toggle"
+          type="button"
+          aria-pressed="false"
+          aria-label="Switch to dark theme"
+        >
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>
+        </button>
       </footer>
     </main>
   </body>

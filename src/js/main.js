@@ -103,8 +103,8 @@
    * ---------------------------------------------------------- */
   /**
    * Wire up the dark/light toggle in the footer.
-   * - The button is labelled with the theme it switches *to*, and mirrors the
-   *   current theme in aria-pressed.
+   * - The button's icon shows the theme it switches *to*; CSS does that swap off
+   *   data-theme, so only aria-pressed and aria-label are set here.
    * - On click, flips data-theme and persists the choice to localStorage["theme"]
    *   (try/catch guards private-mode failures).
    * - Follows OS prefers-color-scheme changes mid-session, but only while the user
@@ -118,7 +118,6 @@
     const sync = () => {
       const dark = document.documentElement.getAttribute("data-theme") === "dark";
       btn.setAttribute("aria-pressed", String(dark));
-      btn.textContent = dark ? "Light" : "Dark";
       btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
     };
     sync();
@@ -446,8 +445,6 @@
 
     const filters = $$(".filter", filterRow);
     const yearBtn = $('[data-filter="year"]', filterRow);
-    const allBtn = $('[data-filter="all"]', filterRow);
-    allBtn.textContent = "all " + data.length;
 
     const years = Array.from(new Set(data.map((p) => p.year))).sort((a, b) => b - a);
     years.forEach((y) => {
@@ -625,24 +622,6 @@
   }
 
   /* ----------------------------------------------------------
-   *  Footer — last-updated date
-   * ---------------------------------------------------------- */
-  /**
-   * Fill [data-updated] with the document's last-modified month/year so the
-   * footer reflects the latest deploy instead of a hand-edited string. No-ops if
-   * the element is missing or the date is unparseable, leaving the static
-   * fallback text in the HTML.
-   */
-  function initFooterDate() {
-    const el = $("[data-updated]");
-    if (!el) return;
-    const d = new Date(document.lastModified);
-    if (isNaN(d.getTime())) return;
-    el.textContent =
-      "updated " + d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  }
-
-  /* ----------------------------------------------------------
    *  Boot — run each feature once. Order is intentional but loose: the sync
    *  features run first, then the three async (JSON-fetching) ones kick off.
    *  Every init* no-ops when its root markup is missing.
@@ -650,7 +629,6 @@
   initThemeToggle();
   initField();
   initContact();
-  initFooterDate();
   initPublications();
   initProjects();
   initInterests();

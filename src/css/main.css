@@ -154,25 +154,24 @@ h1 {
 .lede {
   color: var(--muted);
   font-size: 17px;
-  margin: 0 0 22px;
+  margin: 0 0 26px;
 }
 
 p {
   margin: 0 0 18px;
 }
 
-.standing {
+/* Contact sits here rather than in a section of its own: the links are
+   short enough to carry inline, so they run as one muted sentence separated
+   by middle dots, and the page then needs no footer CTA. */
+.reach {
+  margin: 0 0 34px;
+  font-size: 15px;
   color: var(--muted);
 }
 
-/* Contact sits here rather than in a section of its own: the links are
-   short enough to carry inline, and the page then needs no footer CTA. */
-.reach {
-  margin: 0 0 34px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-  font-size: 15px;
+.reach a {
+  margin-right: 4px;
 }
 
 /* A hairline above each heading is the page's only structural device. */
@@ -180,10 +179,15 @@ h2 {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  margin: 46px 0 14px;
+  margin: 44px 0 14px;
   padding-top: 22px;
   border-top: 1px solid var(--border);
   scroll-margin-top: 16px;
+}
+
+/* The link row already leaves a gap below it, so the first heading sits closer. */
+h2:first-of-type {
+  margin-top: 38px;
 }
 
 ul,
@@ -343,12 +347,10 @@ ol {
   color: var(--muted);
 }
 
-.foot [data-updated] {
-  font-variant-numeric: tabular-nums;
-}
-
 .theme-toggle {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   background: none;
   border: 0;
   padding: 0;
@@ -359,7 +361,21 @@ ol {
 }
 
 .theme-toggle:hover {
-  text-decoration: underline;
+  color: var(--text);
+}
+
+/* Both glyphs are in the markup; the theme attribute picks the one that shows
+   what a click switches *to*, so no script has to swap icons. */
+.theme-toggle__icon--sun {
+  display: none;
+}
+
+html[data-theme="dark"] .theme-toggle__icon--sun {
+  display: block;
+}
+
+html[data-theme="dark"] .theme-toggle__icon--moon {
+  display: none;
 }
 
 /* ============================================================
