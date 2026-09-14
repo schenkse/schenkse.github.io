@@ -140,11 +140,12 @@
   .slot__head { display: flex; gap: 11px; align-items: baseline; }
   .slot__letter {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
-    width: 26px;
+    min-width: 26px;
+    padding-inline: 6px;
     height: 26px;
-    flex: 0 0 26px;
+    flex: 0 0 auto;
     display: grid;
     place-items: center;
     border-radius: 6px;
@@ -209,8 +210,8 @@
 
 <div class="bar">
   <div class="bar__id">
-    <span class="bar__title">Seven directions for schenkse.github.io</span>
-    <span class="bar__sub">same content, seven visual languages — A is closest to today. D was scrapped, so the letters skip it</span>
+    <span class="bar__title">Nine directions for schenkse.github.io</span>
+    <span class="bar__sub">same content, nine visual languages — A is closest to today. E2 and G2 are second drafts of their neighbours; D was scrapped</span>
   </div>
 
   <span class="bar__label">view</span>
@@ -334,6 +335,97 @@
   /* Shared sun/moon glyphs so every mockup can carry a real theme toggle. */
   const SUN = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>';
   const MOON = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>';
+
+  /* A two-source interference pattern that answers the pointer instead of
+     running on a clock. The sources drift toward the cursor, the lattice
+     re-renders while they travel, and the loop stops once they arrive — so
+     the page sits on a still frame whenever nobody is touching it, which is
+     also what a thumbnail and a reduced-motion viewer get.
+
+     Tokens are read off the canvas (custom properties inherit), and a theme
+     flip redraws, because at rest there is no next frame to fix the colours. */
+  function pointerField(cv, opt) {
+    const ctx = cv.getContext("2d");
+    const area = cv.parentElement;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const step = opt.step || 15;
+    const k = opt.k || 0.052;
+    let W = 1, H = 1, running = false;
+    let cur = [0, 0, 0, 0], tgt = [0, 0, 0, 0];
+
+    const home = () => [W * 0.34, H * 0.44, W * 0.68, H * 0.52];
+
+    const size = () => {
+      W = Math.max(1, cv.offsetWidth || 1240);
+      H = Math.max(1, cv.offsetHeight || 420);
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      cv.width = W * dpr;
+      cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const draw = () => {
+      const cs = getComputedStyle(cv);
+      const c1 = cs.getPropertyValue(opt.c1).trim();
+      const c2 = cs.getPropertyValue(opt.c2).trim();
+      ctx.fillStyle = cs.getPropertyValue(opt.bg).trim();
+      ctx.fillRect(0, 0, W, H);
+      for (let y = step / 2; y < H; y += step) {
+        for (let x = step / 2; x < W; x += step) {
+          const v = Math.cos(k * Math.hypot(x - cur[0], y - cur[1])) + Math.cos(k * Math.hypot(x - cur[2], y - cur[3]));
+          const I = (v * v) / 4;
+          if (I < 0.02) continue;
+          const s = Math.max(1, I * (step - 4.5));
+          ctx.globalAlpha = opt.base + I * opt.gain;
+          ctx.fillStyle = v > 0 ? c1 : c2;
+          ctx.fillRect(x - s / 2, y - s / 2, s, s);
+        }
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    const tick = () => {
+      let far = 0;
+      for (let i = 0; i < 4; i++) {
+        cur[i] += (tgt[i] - cur[i]) * 0.09;
+        far = Math.max(far, Math.abs(tgt[i] - cur[i]));
+      }
+      draw();
+      if (far > 0.4) requestAnimationFrame(tick);
+      else running = false;
+    };
+    const kick = () => {
+      if (running || still) return;
+      running = true;
+      requestAnimationFrame(tick);
+    };
+    const reset = () => {
+      size();
+      cur = home();
+      tgt = home();
+      draw();
+    };
+
+    reset();
+    new ResizeObserver(reset).observe(cv);
+    new MutationObserver(draw).observe(cv.getRootNode().host, { attributes: true, attributeFilter: ["data-t"] });
+    if (still) return;
+
+    /* Normalised pointer coordinates, so an ancestor zoom cannot skew them. */
+    area.addEventListener("pointermove", (e) => {
+      const r = cv.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+      const h = home();
+      tgt = [h[0] + nx * 135, h[1] + ny * 85, h[2] - nx * 135, h[3] - ny * 85];
+      kick();
+    });
+    area.addEventListener("pointerleave", () => {
+      tgt = home();
+      kick();
+    });
+  }
 
   const VARIANTS = [];
 
@@ -1201,6 +1293,170 @@
   });
 
   /* =====================================================================
+     E2 — Field, second draft
+     E's two changes applied. The pattern answers the pointer and then sits
+     still, and everything under the hero is pulled down to G's volume: one
+     narrow column, no tiles, no mono chrome on every heading. The hero is
+     still full-bleed, so the page keeps exactly one loud thing.
+     ===================================================================== */
+  VARIANTS.push({
+    letter: "E2",
+    name: "Field, second draft",
+    blurb: "E with the loop removed — the field now follows your cursor and settles — and every section below it pulled down to G's volume.",
+    notes: {
+      Typography: "Archivo and Chivo Mono, as E, but two sizes smaller below the fold",
+      Palette: "unchanged; magenta now appears only inside the hero",
+      "Bold move": "full-bleed hero over a 760px column — loud once, quiet after",
+      Risk: "low; costs nothing at rest and degrades to a still frame",
+    },
+    css: `
+      :host {
+        --bg: #ffffff; --panel: #f6f7fa; --ink: #0a0c14; --mute: #5d6270;
+        --line: #e3e4ec; --a1: #0b93b8; --a2: #cf1f6b;
+        display: block; background: var(--bg); color: var(--ink);
+        font-family: Archivo, ui-sans-serif, system-ui, sans-serif; font-size: 16.5px; line-height: 1.65;
+      }
+      :host([data-t="dark"]) {
+        --bg: #06070d; --panel: #0d0f18; --ink: #eef0f6; --mute: #868ca0;
+        --line: #191c2a; --a1: #3ad6ff; --a2: #ff4fa3;
+      }
+      * { box-sizing: border-box; }
+      a { color: inherit; text-decoration: none; }
+
+      .hero { position: relative; min-height: 540px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+      .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .top { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; gap: 28px; padding: 22px 44px; font-family: "Chivo Mono", ui-monospace, monospace; font-size: 11.5px; letter-spacing: 0.04em; }
+      .top b { font-weight: 600; margin-right: auto; }
+      .top nav { display: flex; gap: 20px; }
+      .top nav a { color: var(--mute); }
+      .top nav a:hover { color: var(--a1); }
+      .tt { background: none; border: 0; padding: 0; color: var(--mute); cursor: pointer; display: grid; place-items: center; }
+      .tt:hover { color: var(--a1); }
+      .hero__in { position: relative; z-index: 2; padding: 0 44px 34px; }
+      .hero h1 { font-size: 92px; font-weight: 900; line-height: 0.86; letter-spacing: -0.045em; margin: 0 0 20px; max-width: 11ch; }
+      .hero p { font-size: 19px; color: var(--mute); max-width: 44ch; margin: 0; line-height: 1.45; }
+      .hero p b { color: var(--ink); font-weight: 500; }
+      .hint { position: absolute; right: 44px; bottom: 34px; z-index: 2; font-family: "Chivo Mono", monospace; font-size: 10.5px; letter-spacing: 0.06em; color: var(--mute); }
+
+      .col { max-width: 760px; margin: 0 auto; padding-inline: 32px; }
+      .facts { display: flex; flex-wrap: wrap; gap: 6px 26px; padding-block: 26px; font-family: "Chivo Mono", monospace; font-size: 11.5px; letter-spacing: 0.05em; color: var(--mute); }
+      .facts b { color: var(--ink); font-weight: 600; }
+
+      .sec { padding-block: 46px; border-top: 1px solid var(--line); }
+      .sec h2 { font-size: 15px; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 20px; color: var(--mute); }
+      .sec p { margin: 0 0 16px; max-width: 62ch; }
+
+      .roles { list-style: none; margin: 24px 0 0; padding: 0; }
+      .roles li { display: grid; grid-template-columns: 124px 1fr; gap: 18px; padding: 10px 0; }
+      .roles .y { font-family: "Chivo Mono", monospace; font-size: 11.5px; color: var(--a1); padding-top: 4px; }
+      .roles b { font-weight: 600; }
+      .roles em { font-style: normal; color: var(--mute); }
+
+      .filters { display: flex; gap: 16px; margin-bottom: 14px; font-family: "Chivo Mono", monospace; font-size: 11.5px; letter-spacing: 0.05em; }
+      .fbtn { font: inherit; background: none; border: 0; padding: 0 0 3px; color: var(--mute); cursor: pointer; border-bottom: 1px solid transparent; }
+      .fbtn[aria-pressed="true"] { color: var(--ink); border-color: var(--a1); }
+
+      .pubs { list-style: none; margin: 0; padding: 0; }
+      .pubs li { padding: 15px 0; border-top: 1px solid var(--line); }
+      .pubs li:first-child { border-top: 0; }
+      .pubs .t { font-size: 18.5px; font-weight: 600; line-height: 1.3; letter-spacing: -0.015em; display: block; }
+      .pubs li:hover .t { color: var(--a1); }
+      .pubs .a { font-size: 14px; color: var(--mute); margin-top: 4px; }
+      .pubs .a b { color: var(--ink); font-weight: 600; }
+      .pubs .m { font-family: "Chivo Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: var(--mute); margin-top: 5px; }
+      .is-out { display: none !important; }
+
+      .repos { list-style: none; margin: 0; padding: 0; }
+      .repos li { padding: 11px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: baseline; }
+      .repos li:first-child { border-top: 0; }
+      .repos b { font-weight: 600; }
+      .repos span { color: var(--mute); }
+      .repos i { font-style: normal; font-family: "Chivo Mono", monospace; font-size: 11px; color: var(--mute); }
+      .repos li:hover b { color: var(--a1); }
+
+      .terms { list-style: none; margin: 0; padding: 0; }
+      .terms li { display: grid; grid-template-columns: 190px 1fr; gap: 18px; padding: 8px 0; }
+      .terms b { font-weight: 600; font-size: 15.5px; }
+      .terms span { color: var(--mute); font-size: 15.5px; }
+
+      .cl { display: flex; flex-wrap: wrap; gap: 10px 22px; font-family: "Chivo Mono", monospace; font-size: 12.5px; letter-spacing: 0.04em; }
+      .cl a { border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+      .cl a:hover { color: var(--a1); border-color: var(--a1); }
+
+      .foot { padding-block: 22px 44px; border-top: 1px solid var(--line); display: flex; font-family: "Chivo Mono", monospace; font-size: 10.5px; letter-spacing: 0.05em; color: var(--mute); }
+      .foot span:last-child { margin-left: auto; }
+    `,
+    html: () => `
+      <section class="hero">
+        <canvas data-field></canvas>
+        <header class="top">
+          <b>SCHENK</b>
+          <nav>${DATA.nav.map((n) => `<a href="#">${n.toLowerCase()}</a>`).join("")}</nav>
+          <button class="tt" data-theme-toggle aria-label="Toggle theme">${SUN}</button>
+        </header>
+        <div class="hero__in">
+          <h1>Sebastian Schenk</h1>
+          <p><b>Theoretical physicist.</b> Instantons, resurgence, tunnelling — and lately the same taste for hard problems applied to quantum information technology.</p>
+        </div>
+        <span class="hint">move the cursor to shift the sources</span>
+      </section>
+
+      <div class="col">
+        <p class="facts"><span><b>${DATA.pubTotal}</b> papers since 2014</span><span><b>${DATA.projects.length}</b> public repos</span><span>Karlsruhe, DE</span><span>Open to collaboration</span></p>
+
+        <section class="sec">
+          <h2>About</h2>
+          ${DATA.bio.map((p) => `<p>${p}</p>`).join("")}
+          <ul class="roles">${DATA.timeline
+            .map((t) => `<li><span class="y">${t.span}</span><span><b>${t.role}</b><br /><em>${t.place}</em></span></li>`)
+            .join("")}</ul>
+        </section>
+
+        <section class="sec">
+          <h2>Publications</h2>
+          <div class="filters" data-filter-group>
+            <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">recent</button>
+            <button class="fbtn" type="button" data-filter="all" aria-pressed="false">all ${DATA.pubTotal}</button>
+            <button class="fbtn" type="button" data-filter="all" aria-pressed="false">by year</button>
+          </div>
+          <ol class="pubs" data-pub-list>${DATA.pubs
+            .map(
+              (p, i) => `<li data-i="${i}">
+                <a class="t" href="#">${p.title}</a>
+                <div class="a">${me(p.authors)}</div>
+                <div class="m">${p.year} · ${p.venue} · arXiv:${p.arxiv}</div>
+              </li>`
+            )
+            .join("")}</ol>
+        </section>
+
+        <section class="sec">
+          <h2>Code</h2>
+          <ul class="repos">${DATA.projects
+            .map((p) => `<li><span><b>${p.name}</b> — <span>${p.desc}</span></span><i>${p.lang}</i></li>`)
+            .join("")}</ul>
+        </section>
+
+        <section class="sec">
+          <h2>Interests</h2>
+          <ul class="terms">${DATA.skills
+            .map((s) => `<li><b>${s.group}</b><span>${s.items.join(", ")}</span></li>`)
+            .join("")}</ul>
+        </section>
+
+        <section class="sec">
+          <h2>Contact</h2>
+          <p>Always up for a good problem. Whichever of these is easiest.</p>
+          <div class="cl">${DATA.links.map((l) => `<a href="${l.href}">${l.label.toLowerCase()}</a>`).join("")}</div>
+        </section>
+
+        <footer class="foot"><span>no framework, no build step</span><span>2026.09</span></footer>
+      </div>
+    `,
+    boot: (root) => pointerField(root.querySelector("[data-field]"), { c1: "--a1", c2: "--a2", bg: "--bg", base: 0.14, gain: 0.5 }),
+  });
+
+  /* =====================================================================
      F — Dossier
      A different layout paradigm to everything above: the identity card is
      fixed on the left and never leaves, so contact is always one click
@@ -1483,6 +1739,132 @@
         </footer>
       </div>
     `,
+  });
+
+  /* =====================================================================
+     G2 — Plain, with a field
+     G exactly as it is — one column, system fonts, zero font requests —
+     plus the interference pattern as the page's single ornament, printed
+     in the two colours the page already owns. Nothing else changes, and
+     the canvas needs no font, so the page still loads in one request.
+     ===================================================================== */
+  VARIANTS.push({
+    letter: "G2",
+    name: "Plain, with a field",
+    blurb: "G untouched, plus one ornament: the interference pattern as a printed plate across the top, in the page's own two colours.",
+    notes: {
+      Typography: "the system stack, unchanged. Still zero font requests",
+      Palette: "paper, ink and link blue — the field borrows the same two inks",
+      "Bold move": "the entire design budget spent on one 230px band",
+      Risk: "the band has to carry the whole first impression on its own",
+    },
+    css: `
+      :host {
+        --bg: #fdfdfc; --ink: #1a1a19; --mute: #6a6a66; --line: #e3e3de; --accent: #0b5fbd;
+        display: block; background: var(--bg); color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px; line-height: 1.72;
+      }
+      :host([data-t="dark"]) {
+        --bg: #131314; --ink: #e6e6e3; --mute: #92928d; --line: #2b2b2c; --accent: #7fb0f5;
+      }
+      * { box-sizing: border-box; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      .band { position: relative; height: 232px; border-bottom: 1px solid var(--line); }
+      .band canvas { width: 100%; height: 100%; display: block; }
+      .page { max-width: 680px; margin: 0 auto; padding: 40px 28px 90px; }
+      .cap { font-size: 13.5px; color: var(--mute); margin: 0 0 30px; }
+
+      h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+      .sub { color: var(--mute); margin: 0 0 26px; font-size: 17px; }
+      p { margin: 0 0 18px; }
+      .meta { font-size: 15px; color: var(--mute); margin: 0 0 34px; }
+      .meta a { margin-right: 4px; }
+
+      h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; margin: 44px 0 14px; padding-top: 22px; border-top: 1px solid var(--line); }
+      h2:first-of-type { margin-top: 38px; }
+
+      ul, ol { margin: 0 0 18px; padding-left: 0; list-style: none; }
+      .roles li { display: grid; grid-template-columns: 128px 1fr; gap: 14px; padding: 5px 0; font-size: 16px; }
+      .roles span { color: var(--mute); font-size: 15px; }
+      .roles em { font-style: normal; color: var(--mute); }
+
+      .filters { font-size: 15px; color: var(--mute); margin-bottom: 12px; }
+      .fbtn { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; margin-right: 12px; }
+      .fbtn:hover { text-decoration: underline; }
+      .fbtn[aria-pressed="true"] { color: var(--ink); font-weight: 600; cursor: default; text-decoration: none; }
+
+      .pubs li { padding: 11px 0; font-size: 16px; line-height: 1.5; }
+      .pubs .t { font-weight: 600; }
+      .pubs .a { color: var(--mute); font-size: 15px; }
+      .pubs .a b { color: var(--ink); font-weight: 600; }
+      .pubs .v { color: var(--mute); font-size: 15px; }
+      .is-out { display: none !important; }
+
+      .repos li { padding: 9px 0; font-size: 16px; }
+      .repos b { font-weight: 600; }
+      .repos span { color: var(--mute); }
+
+      .terms li { padding: 5px 0; font-size: 16px; }
+      .terms b { font-weight: 600; }
+      .terms span { color: var(--mute); }
+
+      footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--mute); display: flex; gap: 16px; }
+      .tt { margin-left: auto; background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--accent); cursor: pointer; }
+      .tt:hover { text-decoration: underline; }
+    `,
+    html: () => `
+      <div class="band"><canvas data-field></canvas></div>
+      <div class="page">
+        <p class="cap">Two coherent sources, interfering. Move the cursor across the plate to shift them.</p>
+
+        <h1>Sebastian Schenk</h1>
+        <p class="sub">${DATA.role} at ${DATA.place}, Karlsruhe.</p>
+        <p>${DATA.intro}</p>
+        <p class="meta">${DATA.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join(" &nbsp;·&nbsp; ")}</p>
+
+        <h2>About</h2>
+        ${DATA.bio.map((p) => `<p>${p}</p>`).join("")}
+        <ul class="roles">${DATA.timeline
+          .map((t) => `<li><span>${t.span}</span><span>${t.role}, <em>${t.place}</em></span></li>`)
+          .join("")}</ul>
+
+        <h2>Publications</h2>
+        <p class="filters" data-filter-group>
+          Showing
+          <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">recent</button>
+          <button class="fbtn" type="button" data-filter="all" aria-pressed="false">all ${DATA.pubTotal}</button>
+          <button class="fbtn" type="button" data-filter="all" aria-pressed="false">by year</button>
+        </p>
+        <ol class="pubs" data-pub-list>${DATA.pubs
+          .map(
+            (p, i) => `<li data-i="${i}">
+              <span class="t">${p.title}</span><br />
+              <span class="a">${me(p.authors)}</span><br />
+              <span class="v">${p.year} · ${p.venue} · <a href="#">arXiv:${p.arxiv}</a></span>
+            </li>`
+          )
+          .join("")}</ol>
+
+        <h2>Code</h2>
+        <ul class="repos">${DATA.projects
+          .map((p) => `<li><a href="#"><b>${p.name}</b></a> — <span>${p.desc} (${p.lang})</span></li>`)
+          .join("")}</ul>
+
+        <h2>Interests</h2>
+        <ul class="terms">${DATA.skills
+          .map((s) => `<li><b>${s.group}:</b> <span>${s.items.join(", ")}</span></li>`)
+          .join("")}</ul>
+
+        <footer>
+          <span>Hand-written HTML. No build step, no fonts to fetch.</span>
+          <button class="tt" data-theme-toggle>Dark</button>
+        </footer>
+      </div>
+    `,
+    boot: (root) => pointerField(root.querySelector("[data-field]"), { c1: "--accent", c2: "--ink", bg: "--bg", step: 13, base: 0.05, gain: 0.34 }),
   });
 
   /* =====================================================================
