@@ -4,39 +4,29 @@
  * Loaded with `defer` from index.html, so it runs after the HTML is parsed.
  * Everything is wrapped in an IIFE in strict mode; nothing leaks to global scope.
  *
- * Behaviors (most `init*` no-op when their root markup is absent):
- *   theme toggle · scroll reveal · contact obfuscation · publication filter ·
- *   hamburger menu · active-section highlight · projects gallery · skills ·
- *   hero motif canvas.
+ * Behaviors (each `init*` no-ops when its root markup is absent):
+ *   theme toggle · interference plate · contact obfuscation ·
+ *   publication filter · projects · interests · footer date.
  *
  * Boot order is defined at the bottom of the file. The async features
- * (publications, projects, skills) fetch their content from src/data/*.json.
+ * (publications, projects, interests) fetch their content from src/data/*.json.
  *
  * Conventions for editing:
  *   - Stay vanilla: no dependencies, no framework, must run as-is in the browser.
  *   - Progressive enhancement: guard new browser APIs and honor reduced-motion.
- *   - Keep ARIA state (aria-expanded / aria-pressed / aria-current) in sync with
- *     visual state.
+ *   - Keep ARIA state (aria-pressed / aria-expanded) in sync with visual state.
  *   - Build all JSON-derived hrefs via safeUrl() so unsafe schemes are neutralized.
- *   - The initial theme is set by an inline <head> script in index.html (pre-paint
- *     to avoid a flash); this file only wires up the toggle and live OS changes.
- *   - Assets carry no cache-busting query: GitHub Pages serves them with a short
- *     max-age, so a deploy propagates to returning visitors within minutes.
+ *   - Build JSON-derived text with textContent, never innerHTML.
+ *   - The initial theme is set by src/js/theme.js (pre-paint); this file only
+ *     handles the toggle and live OS-change following.
  */
-(() => {
+(function () {
   "use strict";
 
   /** querySelector shorthand; returns the first match or null. */
   const $ = (sel, root = document) => root.querySelector(sel);
   /** querySelectorAll shorthand; returns a real Array (so .map/.filter work). */
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  /** Snapshot of the reduced-motion media query; gates all animation. */
-  const prefersReducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-
-  /** Lazily-created shared IntersectionObserver for scroll reveals. */
-  let revealObserver = null;
 
   /**
    * Fetch + parse a same-origin JSON file. Throws on a non-OK HTTP status;
@@ -51,22 +41,6 @@
     const res = await fetch(path);
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
-  };
-
-  /**
-   * Build a publication link chip (<a class="pub-list__link" rel="noopener">).
-   * The caller passes an already-vetted href.
-   * @param {string} href - Pre-validated URL.
-   * @param {string} label - Visible link text (e.g. "arXiv", "DOI", "PDF").
-   * @returns {HTMLAnchorElement}
-   */
-  const makeLink = (href, label) => {
-    const a = document.createElement("a");
-    a.className = "pub-list__link";
-    a.href = href;
-    a.rel = "noopener";
-    a.textContent = label;
-    return a;
   };
 
   /**
@@ -87,11 +61,25 @@
   };
 
   /**
+   * Build an external link with a pre-vetted href.
+   * @param {string} href - Pre-validated URL.
+   * @param {string} label - Visible link text (e.g. "arXiv", "DOI", "PDF").
+   * @returns {HTMLAnchorElement}
+   */
+  const makeLink = (href, label) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.rel = "noopener";
+    a.textContent = label;
+    return a;
+  };
+
+  /**
    * Run a DOM update inside a same-document view transition when the API is
    * available and motion is allowed; otherwise apply it synchronously.
    * While the transition runs, `data-vt=<type>` is set on <html> so CSS can scope
    * per-transition styling (see the "View transitions" section in main.css).
-   * Reads prefers-reduced-motion live (not the load-time snapshot) so a mid-session
+   * Reads prefers-reduced-motion live (not a load-time snapshot) so a mid-session
    * OS change is honored.
    * @param {() => void} update - Mutates the DOM.
    * @param {string} [type] - Optional transition label, mirrored to <html data-vt>.
@@ -114,23 +102,27 @@
    *  Theme toggle
    * ---------------------------------------------------------- */
   /**
-   * Wire up the dark/light toggle button.
-   * - Syncs aria-pressed / aria-label to the current data-theme on <html>.
+   * Wire up the dark/light toggle in the footer.
+   * - The button is labelled with the theme it switches *to*, and mirrors the
+   *   current theme in aria-pressed.
    * - On click, flips data-theme and persists the choice to localStorage["theme"]
    *   (try/catch guards private-mode failures).
    * - Follows OS prefers-color-scheme changes mid-session, but only while the user
    *   has made no explicit choice (nothing stored).
-   * The first paint's theme is set by an inline <head> script in index.html, not here.
+   * The first paint's theme is set by src/js/theme.js, not here.
    */
   function initThemeToggle() {
     const btn = $(".theme-toggle");
     if (!btn) return;
+
     const sync = () => {
       const dark = document.documentElement.getAttribute("data-theme") === "dark";
       btn.setAttribute("aria-pressed", String(dark));
+      btn.textContent = dark ? "Light" : "Dark";
       btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
     };
     sync();
+
     btn.addEventListener("click", (e) => {
       const cur = document.documentElement.getAttribute("data-theme");
       const next = cur === "dark" ? "light" : "dark";
@@ -176,182 +168,125 @@
   }
 
   /* ----------------------------------------------------------
-   *  Scroll reveal
+   *  Interference plate
    * ---------------------------------------------------------- */
   /**
-   * Reveal one element (add class `is-visible`) when it scrolls into view, using
-   * a single shared IntersectionObserver; each element is unobserved after its
-   * first reveal. Falls back to revealing immediately when reduced-motion is
-   * preferred or IntersectionObserver is unsupported.
-   * Also called directly by initSkills() for dynamically created groups.
-   * @param {Element} el
+   * Draw the page's one ornament: two coherent point sources interfering on a
+   * lattice of cells. Cell brightness is the squared sum of the two amplitudes,
+   * and the sign of that sum picks which of the page's two inks it is drawn in.
+   *
+   * The pattern answers the pointer rather than running on a clock. Moving the
+   * cursor across the plate sets a target position for the sources; they ease
+   * toward it, the lattice re-renders while they travel, and the loop stops as
+   * soon as they arrive — so an idle page costs nothing and sits on a still
+   * frame, which is also what a screenshot and a reduced-motion visitor get.
    */
-  function observeReveal(el) {
-    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
-      el.classList.add("is-visible");
-      return;
-    }
-    if (!revealObserver) {
-      revealObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add("is-visible");
-              revealObserver.unobserve(e.target);
-            }
-          });
-        },
-        { rootMargin: "0px 0px -10% 0px", threshold: 0.05 }
-      );
-    }
-    revealObserver.observe(el);
-  }
+  function initField() {
+    const band = $("[data-field]");
+    const cv = band && $("canvas", band);
+    const ctx = cv && cv.getContext && cv.getContext("2d");
+    if (!ctx) return;
 
-  /** Register every static [data-reveal] element for scroll reveal. */
-  function initScrollReveal() {
-    $$("[data-reveal]").forEach(observeReveal);
-  }
+    const STEP = 13;       // lattice spacing, px
+    const K = 0.052;       // wavenumber; sets the fringe spacing
+    const REACH = 135;     // how far the pointer can drag a source, px
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ----------------------------------------------------------
-   *  Hamburger / mobile nav
-   * ---------------------------------------------------------- */
-  /**
-   * Wire up the mobile menu (.nav-toggle + #primary-nav). Open/closed state lives
-   * in the toggle's aria-expanded attribute and the nav's `is-open` class.
-   * - Click toggles; clicking a nav link closes (no focus restore).
-   * - Escape closes and restores focus to the toggle.
-   * - While open, Tab / Shift+Tab are trapped within the visible focusable items
-   *   (focusables() filters hidden elements via offsetParent !== null).
-   */
-  function initNavToggle() {
-    const toggle = $(".nav-toggle");
-    const nav = $("#primary-nav");
-    if (!toggle || !nav) return;
+    let w = 1;
+    let h = 1;
+    let running = false;
+    let cur = [0, 0, 0, 0];  // [x1, y1, x2, y2], current
+    let tgt = [0, 0, 0, 0];  // [x1, y1, x2, y2], eased toward
 
-    const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
-    const focusables = () =>
-      $$('a[href], button:not([disabled])', nav).filter(
-        (el) => el.offsetParent !== null
-      );
+    const home = () => [w * 0.34, h * 0.44, w * 0.68, h * 0.52];
 
-    const close = (restoreFocus) => {
-      if (!isOpen()) return;
-      toggle.setAttribute("aria-expanded", "false");
-      nav.classList.remove("is-open");
-      if (restoreFocus) toggle.focus();
-    };
-    const open = () => {
-      toggle.setAttribute("aria-expanded", "true");
-      nav.classList.add("is-open");
-      const items = focusables();
-      if (items.length) items[0].focus();
+    const resize = () => {
+      w = Math.max(1, cv.offsetWidth);
+      h = Math.max(1, cv.offsetHeight);
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      cv.width = w * dpr;
+      cv.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    toggle.addEventListener("click", () => {
-      isOpen() ? close(true) : open();
-    });
-
-    nav.addEventListener("click", (e) => {
-      if (e.target instanceof HTMLAnchorElement) close(false);
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && isOpen()) close(true);
-    });
-
-    // Leaving the mobile breakpoint reflows the nav back to a desktop row, so
-    // clear any open-menu state (aria-expanded, .is-open, the focus trap) that
-    // would otherwise go stale. 720px matches the .nav-toggle media query in CSS.
-    window
-      .matchMedia("(max-width: 720px)")
-      .addEventListener("change", (e) => {
-        if (!e.matches) close(false);
-      });
-
-    // Trap focus within the open mobile menu.
-    nav.addEventListener("keydown", (e) => {
-      if (e.key !== "Tab" || !isOpen()) return;
-      const items = focusables();
-      if (!items.length) return;
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
+    const draw = () => {
+      const cs = getComputedStyle(cv);
+      const bright = cs.getPropertyValue("--accent").trim();
+      const dim = cs.getPropertyValue("--text").trim();
+      ctx.fillStyle = cs.getPropertyValue("--bg").trim();
+      ctx.fillRect(0, 0, w, h);
+      for (let y = STEP / 2; y < h; y += STEP) {
+        for (let x = STEP / 2; x < w; x += STEP) {
+          const amplitude =
+            Math.cos(K * Math.hypot(x - cur[0], y - cur[1])) +
+            Math.cos(K * Math.hypot(x - cur[2], y - cur[3]));
+          const intensity = (amplitude * amplitude) / 4;
+          if (intensity < 0.02) continue;
+          const size = Math.max(1, intensity * (STEP - 4));
+          ctx.globalAlpha = 0.05 + intensity * 0.34;
+          ctx.fillStyle = amplitude > 0 ? bright : dim;
+          ctx.fillRect(x - size / 2, y - size / 2, size, size);
+        }
       }
+      ctx.globalAlpha = 1;
+    };
+
+    const tick = () => {
+      let far = 0;
+      for (let i = 0; i < 4; i++) {
+        cur[i] += (tgt[i] - cur[i]) * 0.09;
+        far = Math.max(far, Math.abs(tgt[i] - cur[i]));
+      }
+      draw();
+      if (far > 0.4) requestAnimationFrame(tick);
+      else running = false;
+    };
+
+    const kick = () => {
+      if (running || still) return;
+      running = true;
+      requestAnimationFrame(tick);
+    };
+
+    const reset = () => {
+      resize();
+      cur = home();
+      tgt = home();
+      draw();
+    };
+
+    reset();
+    window.addEventListener("resize", reset);
+    // At rest there is no next frame to pick up new token values, so a theme
+    // change has to repaint the plate explicitly.
+    new MutationObserver(draw).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    if (still) return;
+
+    band.addEventListener("pointermove", (e) => {
+      const r = cv.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+      const at = home();
+      tgt = [
+        at[0] + nx * REACH,
+        at[1] + ny * (REACH * 0.63),
+        at[2] - nx * REACH,
+        at[3] - ny * (REACH * 0.63),
+      ];
+      kick();
+    });
+    band.addEventListener("pointerleave", () => {
+      tgt = home();
+      kick();
     });
   }
 
   /* ----------------------------------------------------------
-   *  Header shadow on scroll + active section in nav
-   * ---------------------------------------------------------- */
-  /**
-   * Two scroll behaviors:
-   *  1. Toggle `is-scrolled` on .site-header once scrolled past 8px (passive listener).
-   *  2. Mark the most-visible section's nav link with aria-current="section", via an
-   *     IntersectionObserver whose rootMargin (-40% / -50%) makes the "active" band
-   *     roughly the middle of the viewport. Sections are those targeted by
-   *     .primary-nav a[href^="#"] links.
-   */
-  function initActiveSection() {
-    const header = $(".site-header");
-    const navLinks = $$('.primary-nav a[href^="#"]');
-    const sections = navLinks
-      .map((a) => document.getElementById(a.getAttribute("href").slice(1)))
-      .filter(Boolean);
-
-    const clearActive = () =>
-      navLinks.forEach((a) => a.removeAttribute("aria-current"));
-
-    if (header) {
-      const onScroll = () => {
-        header.classList.toggle("is-scrolled", window.scrollY > 8);
-        // The observer only sets — never clears — the highlight, so the first
-        // link stays stuck active when scrolling back up into the hero. Clear it
-        // only while above the first section. The threshold matches the active
-        // band's lower edge (50% of the viewport, the bottom of the -40%/-50%
-        // rootMargin) so this never fires while that section is intersecting —
-        // using the upper edge (40%) would clear it during its first entry.
-        if (
-          sections.length &&
-          window.scrollY + window.innerHeight * 0.5 < sections[0].offsetTop
-        ) {
-          clearActive();
-        }
-      };
-      onScroll();
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }
-
-    if (!sections.length || !("IntersectionObserver" in window)) return;
-
-    const setActive = (id) => {
-      navLinks.forEach((a) => {
-        if (a.getAttribute("href") === "#" + id) {
-          a.setAttribute("aria-current", "section");
-        } else {
-          a.removeAttribute("aria-current");
-        }
-      });
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(visible.target.id);
-      },
-      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
-    );
-    sections.forEach((s) => io.observe(s));
-  }
-
-  /* ----------------------------------------------------------
-   *  Contact obfuscation — emails and Matrix assembled at runtime
+   *  Contact
    * ---------------------------------------------------------- */
   /**
    * Assemble the email and Matrix handle at runtime from split string parts so
@@ -363,7 +298,7 @@
    */
   function initContact() {
     // Email parts (split to avoid simple scraper regex).
-    const emailUser = "hello"
+    const emailUser = "hello";
     const emailDomain = ["sschenk", "simplelogin", "com"].join(".");
     const email = emailUser + "@" + emailDomain;
 
@@ -371,20 +306,15 @@
     const matrixServer = "matrix.org";
     const matrixHandle = "@" + matrixUser + ":" + matrixServer;
 
-    const emailEls = $$("[data-email]");
-    emailEls.forEach((el) => {
+    $$("[data-email]").forEach((el) => {
       if (el.dataset.email !== "href") el.textContent = email;
       el.setAttribute("href", "mailto:" + email);
       el.setAttribute("rel", "me noopener");
     });
 
-    const matrixEls = $$("[data-matrix]");
-    matrixEls.forEach((el) => {
+    $$("[data-matrix]").forEach((el) => {
       if (el.dataset.matrix !== "href") el.textContent = matrixHandle;
-      el.setAttribute(
-        "href",
-        "https://matrix.to/#/" + encodeURIComponent(matrixHandle)
-      );
+      el.setAttribute("href", "https://matrix.to/#/" + encodeURIComponent(matrixHandle));
       el.setAttribute("rel", "me noopener");
     });
   }
@@ -402,73 +332,73 @@
    *    pdf     {string}            URL or relative path; unsafe schemes neutralized
    * ---------------------------------------------------------- */
   /**
-   * Render a list of publications into `list`, updating the `count` label.
-   * Shows an empty-state row when there are none. arxiv/doi accept bare IDs (expanded
-   * to canonical URLs) or full URLs; every href is built via safeUrl(), which
-   * neutralizes javascript:/data:/vbscript: schemes to "#".
+   * Render a list of publications into `list`, one entry per line: title,
+   * authors (with S. Schenk in bold), then a meta line of year, venue and links.
+   * arxiv/doi accept bare IDs (expanded to canonical URLs) or full URLs; every
+   * href is built via safeUrl(), which neutralizes javascript:/data:/vbscript:.
    * @param {object[]} items - Publications to render.
-   * @param {HTMLElement} list - The <ul> to fill.
-   * @param {HTMLElement} count - Element receiving the "N publications" label.
+   * @param {HTMLElement} list - The <ol> to fill.
    */
-  function renderPublications(items, list, count) {
-    list.innerHTML = "";
+  function renderPublications(items, list) {
+    list.textContent = "";
     if (!items.length) {
       const li = document.createElement("li");
       li.className = "empty-state";
       li.textContent = "No publications match this filter.";
       list.appendChild(li);
-      count.textContent = "";
       return;
     }
-    count.textContent = items.length + " publication" + (items.length > 1 ? "s" : "");
 
     const frag = document.createDocumentFragment();
     items.forEach((p, idx) => {
       const li = document.createElement("li");
-      li.className = "pub-list__item";
       // Stable, unique custom-ident so a paper shown by two filters morphs to its
       // new position across a view transition instead of cross-fading. arXiv ids are
       // unique; fall back to DOI, then the list index.
       li.style.viewTransitionName =
         "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
 
-      const year = document.createElement("span");
-      year.className = "pub-list__year";
-      year.textContent = String(p.year);
-
-      const main = document.createElement("div");
-      const title = document.createElement("p");
-      title.className = "pub-list__title";
+      const title = document.createElement("span");
+      title.className = "pub__title";
       title.textContent = p.title;
-      const authors = document.createElement("p");
-      authors.className = "pub-list__authors";
+
+      const authors = document.createElement("span");
+      authors.className = "pub__authors";
       const authorList = Array.isArray(p.authors)
         ? p.authors
         : String(p.authors || "").split(/,\s*/);
-      authors.textContent = authorList.join(", ");
-      main.append(title, authors);
-      const venueText = p.venue || p.journal;
-      if (venueText) {
-        const venue = document.createElement("p");
-        venue.className = "pub-list__venue";
-        venue.textContent = venueText;
-        main.appendChild(venue);
-      }
+      authorList.forEach((name, i) => {
+        if (i) authors.append(", ");
+        // Bold the site owner, the way a CV does.
+        if (/^S\.\s*Schenk$/i.test(name.trim())) {
+          const b = document.createElement("b");
+          b.textContent = name;
+          authors.appendChild(b);
+        } else {
+          authors.append(name);
+        }
+      });
 
-      const links = document.createElement("div");
-      links.className = "pub-list__links";
+      const meta = document.createElement("span");
+      meta.className = "pub__meta";
+      meta.append(String(p.year));
+      const venueText = p.venue || p.journal;
+      if (venueText) meta.append(" · " + venueText);
       if (p.arxiv) {
-        links.appendChild(makeLink(safeUrl(p.arxiv, "https://arxiv.org/abs/"), "arXiv"));
+        meta.append(" · ");
+        meta.appendChild(makeLink(safeUrl(p.arxiv, "https://arxiv.org/abs/"), "arXiv"));
       }
       if (p.doi) {
-        links.appendChild(makeLink(safeUrl(p.doi, "https://doi.org/"), "DOI"));
+        meta.append(" · ");
+        meta.appendChild(makeLink(safeUrl(p.doi, "https://doi.org/"), "DOI"));
       }
       if (p.pdf) {
+        meta.append(" · ");
         // No base, so absolute http(s) URLs and relative in-repo PDF paths both pass.
-        links.appendChild(makeLink(safeUrl(p.pdf), "PDF"));
+        meta.appendChild(makeLink(safeUrl(p.pdf), "PDF"));
       }
 
-      li.append(year, main, links);
+      li.append(title, authors, meta);
       frag.appendChild(li);
     });
     list.appendChild(frag);
@@ -478,31 +408,35 @@
    * Load and wire up the filterable publication list.
    *
    * Sorting: by year descending, ties broken by arXiv ID (YYMM.NNNNN) descending,
-   * so "Recent" is correct regardless of the JSON's order.
+   * so "recent" is correct regardless of the JSON's order.
    *
-   * Filter modes (state.mode): "recent" (first 3, default), "all", "year" (one year
-   * from the dropdown). The active filter is mirrored in the URL query and read back
-   * on load: ?pub=all, ?pub=<year> (only if that year exists), else recent.
-   * writeUrl() uses history.replaceState and keeps the #publications hash. The year
-   * dropdown closes on outside click or Escape.
+   * Filter modes (state.mode): "recent" (first 3, default), "all", "year" (one
+   * year from the inline year row, which "by year" expands). The active filter is
+   * mirrored in the URL query and read back on load: ?pub=all, ?pub=<year> (only
+   * if that year exists), else recent. writeUrl() uses history.replaceState and
+   * keeps the #publications hash.
    */
   async function initPublications() {
-    const list = $('[data-pub-list]');
-    const count = $('[data-pub-count]');
-    if (!list) return;
+    const list = $("[data-pub-list]");
+    const filterRow = $("[data-pub-filters]");
+    const yearRow = $("[data-pub-years]");
+    if (!list || !filterRow || !yearRow) return;
 
     let data;
     try {
       data = await loadJSON("src/data/publications.json");
     } catch (err) {
       console.error("Failed to load publications:", err);
-      list.innerHTML =
-        '<li class="empty-state">Publications couldn\'t load. ' +
-        "If you opened this file directly, run a local server.</li>";
+      list.textContent = "";
+      const li = document.createElement("li");
+      li.className = "empty-state";
+      li.textContent =
+        "Publications couldn't load. If you opened this file directly, run a local server.";
+      list.appendChild(li);
       return;
     }
 
-    // arXiv IDs (YYMM.NNNNN) break ties within a year by recency, so "Recent"
+    // arXiv IDs (YYMM.NNNNN) break ties within a year by recency, so "recent"
     // stays correct regardless of the JSON's ordering.
     const arxivKey = (p) => {
       const m = String(p.arxiv || "").match(/(\d{4}\.\d{4,5})/);
@@ -510,22 +444,22 @@
     };
     data.sort((a, b) => b.year - a.year || arxivKey(b).localeCompare(arxivKey(a)));
 
-    const filters = $$(".pub-filter");
-    const yearToggle = $(".pub-year__toggle");
-    const yearMenu = $(".pub-year__menu");
-    const yearLabel = $(".pub-year__label");
+    const filters = $$(".filter", filterRow);
+    const yearBtn = $('[data-filter="year"]', filterRow);
+    const allBtn = $('[data-filter="all"]', filterRow);
+    allBtn.textContent = "all " + data.length;
 
     const years = Array.from(new Set(data.map((p) => p.year))).sort((a, b) => b - a);
-    yearMenu.innerHTML = "";
     years.forEach((y) => {
       const li = document.createElement("li");
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "pub-year__option";
+      btn.className = "filter year";
       btn.textContent = String(y);
       btn.dataset.year = String(y);
+      btn.setAttribute("aria-pressed", "false");
       li.appendChild(btn);
-      yearMenu.appendChild(li);
+      yearRow.appendChild(li);
     });
 
     const readUrl = () => {
@@ -555,56 +489,41 @@
       else if (state.mode === "year" && state.year != null) {
         items = data.filter((p) => p.year === state.year);
       }
-      renderPublications(items, list, count);
+      renderPublications(items, list);
 
       filters.forEach((b) => {
-        const active = b.dataset.filter === state.mode;
-        b.classList.toggle("is-active", active);
-        b.setAttribute("aria-pressed", String(active));
+        b.setAttribute("aria-pressed", String(b.dataset.filter === state.mode));
       });
-      const yearActive = state.mode === "year";
-      yearToggle.classList.toggle("is-active", yearActive);
-      yearToggle.setAttribute("aria-pressed", String(yearActive));
-      yearLabel.textContent = yearActive ? String(state.year) : "Year";
+      // The year row stays open for as long as a year is the active filter.
+      const byYear = state.mode === "year";
+      if (byYear) yearRow.hidden = false;
+      yearBtn.setAttribute("aria-expanded", String(!yearRow.hidden));
+      $$(".year", yearRow).forEach((b) => {
+        b.setAttribute("aria-pressed", String(byYear && Number(b.dataset.year) === state.year));
+      });
     };
 
-    filters.forEach((b) => {
-      b.addEventListener("click", () => {
-        state = { mode: b.dataset.filter, year: null };
-        writeUrl();
-        withViewTransition(applyFilter, "pub");
-      });
+    filterRow.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-filter]");
+      if (!btn) return;
+      if (btn.dataset.filter === "year") {
+        // "by year" only opens the row; picking a year is what filters.
+        yearRow.hidden = !yearRow.hidden;
+        yearBtn.setAttribute("aria-expanded", String(!yearRow.hidden));
+        return;
+      }
+      state = { mode: btn.dataset.filter, year: null };
+      yearRow.hidden = true;
+      writeUrl();
+      withViewTransition(applyFilter, "pub");
     });
 
-    const closeYearMenu = (restoreFocus) => {
-      yearMenu.hidden = true;
-      yearToggle.setAttribute("aria-expanded", "false");
-      if (restoreFocus) yearToggle.focus();
-    };
-    const openYearMenu = () => {
-      yearMenu.hidden = false;
-      yearToggle.setAttribute("aria-expanded", "true");
-      const first = $(".pub-year__option", yearMenu);
-      if (first) first.focus();
-    };
-
-    yearToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      yearMenu.hidden ? openYearMenu() : closeYearMenu(false);
-    });
-    yearMenu.addEventListener("click", (e) => {
+    yearRow.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-year]");
       if (!btn) return;
       state = { mode: "year", year: Number(btn.dataset.year) };
       writeUrl();
-      closeYearMenu(true);
       withViewTransition(applyFilter, "pub");
-    });
-    document.addEventListener("click", (e) => {
-      if (!yearMenu.hidden && !e.target.closest(".pub-year")) closeYearMenu(false);
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !yearMenu.hidden) closeYearMenu(true);
     });
 
     applyFilter();
@@ -618,329 +537,91 @@
    *    url {string} (scheme-less values get https:// prefixed) · year {number}
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/projects.json and render a horizontally-scrolling card gallery
-   * (sorted by year descending). Each card's link is a stretched/"covering" link
-   * given a concise aria-label so screen readers don't announce the whole card.
-   * After render, attaches the gallery controls and drag-scroll helpers.
+   * Load src/data/projects.json and render it as a plain list, newest first.
+   * Only the first tag is shown — it's the project's primary language, and the
+   * full tag list would crowd the line without telling a reader much more.
    */
   async function initProjects() {
-    const grid = $('[data-project-grid]');
-    if (!grid) return;
+    const list = $("[data-project-list]");
+    if (!list) return;
 
     let data;
     try {
       data = await loadJSON("src/data/projects.json");
     } catch (err) {
       console.error("Failed to load projects:", err);
-      grid.innerHTML =
-        '<li class="empty-state">Projects couldn\'t load.</li>';
+      list.textContent = "";
+      const li = document.createElement("li");
+      li.className = "empty-state";
+      li.textContent = "Projects couldn't load.";
+      list.appendChild(li);
       return;
     }
 
-    grid.innerHTML = "";
-    data.sort((a, b) => (b.year || 0) - (a.year || 0));
+    data.sort((a, b) => b.year - a.year || String(a.name).localeCompare(String(b.name)));
+
+    list.textContent = "";
     const frag = document.createDocumentFragment();
     data.forEach((p) => {
       const li = document.createElement("li");
-      li.className = "project-card";
-
-      const head = document.createElement("div");
-      head.className = "project-card__head";
-      const name = document.createElement("span");
-      name.className = "project-card__name";
-      name.textContent = p.name;
-      const year = document.createElement("span");
-      year.className = "project-card__year";
-      year.textContent = p.year ? String(p.year) : "";
-      head.append(name, year);
-
-      const desc = document.createElement("p");
-      desc.className = "project-card__desc";
-      desc.textContent = p.description;
-
-      const tags = document.createElement("div");
-      tags.className = "project-card__tags";
-      (p.tags || []).forEach((t) => {
-        const span = document.createElement("span");
-        span.className = "project-card__tag";
-        span.textContent = t;
-        tags.appendChild(span);
-      });
 
       const link = document.createElement("a");
-      link.className = "project-card__link";
       link.href = safeUrl(p.url, "https://");
       link.rel = "noopener";
-      link.textContent = "View on GitHub";
-      // The stretched link covers the whole card, so give it a concise name
-      // instead of letting screen readers announce all the card text.
-      link.setAttribute("aria-label", p.name + " — View on GitHub");
+      const name = document.createElement("b");
+      name.textContent = p.name;
+      link.appendChild(name);
 
-      li.append(head, desc, tags, link);
+      const rest = document.createElement("span");
+      const lang = Array.isArray(p.tags) && p.tags.length ? p.tags[0] : "";
+      rest.textContent = " — " + p.description + (lang ? " (" + lang + ")" : "");
+
+      li.append(link, rest);
       frag.appendChild(li);
     });
-    grid.appendChild(frag);
-
-    setupGalleryControls(grid);
-    enableDragScroll(grid);
-  }
-
-  /**
-   * Attach prev/next gallery buttons ([data-gallery-prev] / [data-gallery-next]).
-   * Each click scrolls the track by one card width (card width + column gap).
-   * Buttons disable at the ends; the whole [data-gallery-nav] control hides when
-   * there's no overflow. Honors reduced-motion (auto vs smooth scroll).
-   * @param {HTMLElement} track - The scrollable gallery container.
-   */
-  function setupGalleryControls(track) {
-    const prev = $("[data-gallery-prev]");
-    const next = $("[data-gallery-next]");
-    const nav = $("[data-gallery-nav]");
-    if (!prev || !next) return;
-
-    const stepSize = () => {
-      const card = track.querySelector(".project-card");
-      if (!card) return track.clientWidth;
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      return card.offsetWidth + gap;
-    };
-
-    const update = () => {
-      const maxScroll = track.scrollWidth - track.clientWidth;
-      prev.disabled = track.scrollLeft <= 1;
-      next.disabled = track.scrollLeft >= maxScroll - 1;
-      if (nav) nav.hidden = maxScroll <= 1;
-    };
-
-    const step = (dir) => {
-      track.scrollBy({
-        left: dir * stepSize(),
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-      });
-    };
-
-    prev.addEventListener("click", () => step(-1));
-    next.addEventListener("click", () => step(1));
-    track.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    update();
-  }
-
-  /**
-   * Click-and-drag scrolling for mouse pointers only; touch keeps native momentum.
-   * Disables scroll-snap mid-drag and re-enables it on release to settle on the
-   * nearest card. A drag of more than 6px swallows the trailing click (capture
-   * phase) so dragging never opens a card's link.
-   * @param {HTMLElement} track - The scrollable gallery container.
-   */
-  function enableDragScroll(track) {
-    let down = false;
-    let moved = false;
-    let startX = 0;
-    let startLeft = 0;
-
-    track.addEventListener("pointerdown", (e) => {
-      if (e.pointerType !== "mouse") return;
-      down = true;
-      moved = false;
-      startX = e.clientX;
-      startLeft = track.scrollLeft;
-      // Disable snap mid-drag so scrolling tracks the cursor smoothly.
-      track.style.scrollSnapType = "none";
-      track.classList.add("is-grabbing");
-    });
-
-    track.addEventListener("pointermove", (e) => {
-      if (!down) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 6) moved = true;
-      track.scrollLeft = startLeft - dx;
-    });
-
-    const end = () => {
-      if (!down) return;
-      down = false;
-      // Re-engaging mandatory snap settles the track to the nearest card.
-      track.style.scrollSnapType = "";
-      track.classList.remove("is-grabbing");
-    };
-    track.addEventListener("pointerup", end);
-    track.addEventListener("pointerleave", end);
-
-    // A drag must never open a card's link, so swallow the trailing click.
-    track.addEventListener(
-      "click",
-      (e) => {
-        if (moved) {
-          e.preventDefault();
-          e.stopPropagation();
-          moved = false;
-        }
-      },
-      true
-    );
+    list.appendChild(frag);
   }
 
   /* ----------------------------------------------------------
-   *  Skills
+   *  Interests
    *
-   *  JSON: src/data/skills.json — an OBJECT of { "Group label": ["item", ...] }.
+   *  JSON: src/data/skills.json — an object of { group: string[] }.
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/skills.json and render each non-empty group as a .skill-group of
-   * chips. Groups are created with [data-reveal] and registered via observeReveal()
-   * so they animate in like static content.
+   * Load src/data/skills.json and render one line per group: the group name,
+   * then its items as a comma-separated list. Empty groups are skipped.
    */
-  async function initSkills() {
-    const root = $('[data-skills]');
-    if (!root) return;
+  async function initInterests() {
+    const list = $("[data-skills]");
+    if (!list) return;
 
     let data;
     try {
       data = await loadJSON("src/data/skills.json");
     } catch (err) {
-      console.error("Failed to load skills:", err);
-      root.innerHTML = '<p class="empty-state">Skills couldn\'t load.</p>';
+      console.error("Failed to load interests:", err);
+      list.textContent = "";
+      const li = document.createElement("li");
+      li.className = "empty-state";
+      li.textContent = "Interests couldn't load.";
+      list.appendChild(li);
       return;
     }
 
-    root.innerHTML = "";
+    list.textContent = "";
     const frag = document.createDocumentFragment();
     Object.entries(data)
       .filter(([, items]) => Array.isArray(items) && items.length)
       .forEach(([label, items]) => {
-      const group = document.createElement("div");
-      group.className = "skill-group";
-      group.setAttribute("data-reveal", "");
-      observeReveal(group);
-      const h = document.createElement("p");
-      h.className = "skill-group__label";
-      h.textContent = "· · " + label.toLowerCase();
-      const chips = document.createElement("div");
-      chips.className = "skill-group__chips";
-      items.forEach((t) => {
-        const span = document.createElement("span");
-        span.className = "skill-chip";
-        span.textContent = t;
-        chips.appendChild(span);
+        const li = document.createElement("li");
+        const name = document.createElement("b");
+        name.textContent = label + ":";
+        const values = document.createElement("span");
+        values.textContent = " " + items.join(", ");
+        li.append(name, values);
+        frag.appendChild(li);
       });
-      group.append(h, chips);
-      frag.appendChild(group);
-    });
-    root.appendChild(frag);
-  }
-
-  /* ----------------------------------------------------------
-   *  Hero motif — soft animated sine wave on a small canvas
-   * ---------------------------------------------------------- */
-  /**
-   * Draw a soft animated "wave" motif on the .hero__motif <canvas> (concentric arcs
-   * plus a faint sine wave), colored from the CSS --accent custom property.
-   * - Reduced motion: renders a single static frame instead of animating.
-   * - HiDPI: resize() scales the backing store by devicePixelRatio (capped at 2).
-   * - Performance: pauses the rAF loop while the tab is hidden (visibilitychange).
-   * - Theme reactivity: a MutationObserver on <html> data-theme re-renders the static
-   *   frame so the accent color updates on theme change.
-   */
-  function initHeroMotif() {
-    const canvas = $(".hero__motif");
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    let raf = null;
-    let running = !prefersReducedMotion;
-    let w = canvas.width;
-    let h = canvas.height;
-    let dpr = 1;
-
-    const readAccent = () =>
-      getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() ||
-      "#00a3ad";
-    // getComputedStyle forces a style flush, so cache the accent and refresh it
-    // only on theme change (see the MutationObserver below) rather than per frame.
-    let accentColor = readAccent();
-
-    const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = canvas.getBoundingClientRect();
-      w = Math.max(1, Math.floor(rect.width));
-      h = Math.max(1, Math.floor(rect.height));
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const drawFrame = (t) => {
-      ctx.clearRect(0, 0, w, h);
-      const color = accentColor;
-      const cx = w / 2;
-      const cy = h / 2;
-
-      // Concentric arcs — a quiet "wave" motif behind the portrait.
-      ctx.lineWidth = 1;
-      const baseR = Math.min(w, h) * 0.18;
-      for (let i = 0; i < 5; i++) {
-        const r = baseR + i * 18 + Math.sin(t / 1400 + i) * 4;
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.globalAlpha = 0.18 - i * 0.025;
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // A faint sine wave running through the middle.
-      ctx.beginPath();
-      ctx.globalAlpha = 0.35;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.4;
-      const amp = 10;
-      const k = (Math.PI * 2) / (w * 0.55);
-      const phase = t / 700;
-      for (let x = 0; x <= w; x += 2) {
-        const y = cy + Math.sin(x * k + phase) * amp;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    };
-
-    const loop = (t) => {
-      if (!running) return;
-      drawFrame(t);
-      raf = requestAnimationFrame(loop);
-    };
-
-    const start = () => {
-      if (raf || !running) return;
-      raf = requestAnimationFrame(loop);
-    };
-    const stop = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = null;
-    };
-
-    resize();
-    if (running) {
-      start();
-    } else {
-      // Render one static frame for reduced-motion users.
-      drawFrame(0);
-    }
-
-    window.addEventListener("resize", () => {
-      resize();
-      if (!running) drawFrame(0);
-    });
-    document.addEventListener("visibilitychange", () => {
-      document.hidden ? stop() : start();
-    });
-
-    // Refresh the cached accent and re-render on theme change.
-    const mo = new MutationObserver(() => {
-      accentColor = readAccent();
-      if (!running) drawFrame(0);
-    });
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    list.appendChild(frag);
   }
 
   /* ----------------------------------------------------------
@@ -964,16 +645,13 @@
   /* ----------------------------------------------------------
    *  Boot — run each feature once. Order is intentional but loose: the sync
    *  features run first, then the three async (JSON-fetching) ones kick off.
-   *  Most init* functions no-op when their root markup is missing.
+   *  Every init* no-ops when its root markup is missing.
    * ---------------------------------------------------------- */
   initThemeToggle();
-  initNavToggle();
+  initField();
   initContact();
-  initHeroMotif();
-  initScrollReveal();
-  initActiveSection();
   initFooterDate();
   initPublications();
   initProjects();
-  initSkills();
+  initInterests();
 })();
