@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
   rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Chivo+Mono:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700;800&family=Karla:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;900&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Chivo+Mono:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Karla:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
 />
 
 <style>
@@ -209,8 +209,8 @@
 
 <div class="bar">
   <div class="bar__id">
-    <span class="bar__title">Five directions for schenkse.github.io</span>
-    <span class="bar__sub">same content, five visual languages — A is closest to today, E is furthest</span>
+    <span class="bar__title">Seven directions for schenkse.github.io</span>
+    <span class="bar__sub">same content, seven visual languages — A is closest to today. D was scrapped, so the letters skip it</span>
   </div>
 
   <span class="bar__label">view</span>
@@ -955,177 +955,6 @@
   });
 
   /* =====================================================================
-     D — Monograph
-     No cards anywhere. One enormous display face doing all the work, a
-     narrow measure, and a great deal of air. The year is the loudest thing
-     in a publication row, which is how a bibliography actually reads.
-     ===================================================================== */
-  VARIANTS.push({
-    letter: "D",
-    name: "Monograph",
-    blurb: "Book-scale typography, no cards at all. Quiet, confident, and the furthest thing from a template.",
-    notes: {
-      Typography: "Instrument Serif at display size, Karla for everything else",
-      Palette: "porcelain grey and ink, with Klein blue as the only accent",
-      "Bold move": "the name set at 120px and the portrait bleeding off the page edge",
-      Risk: "needs restraint in the copy; long titles have to be allowed to breathe",
-    },
-    css: `
-      :host {
-        --bg: #f1f0ee; --panel: #fbfaf9; --ink: #101114; --mute: #6c6c72;
-        --line: #d6d4d0; --accent: #1f2fb8;
-        display: block; background: var(--bg); color: var(--ink);
-        font-family: Karla, ui-sans-serif, system-ui, sans-serif; font-size: 17px; line-height: 1.65;
-      }
-      :host([data-t="dark"]) {
-        --bg: #0e0f12; --panel: #15161a; --ink: #f1f0ee; --mute: #8b8b92;
-        --line: #26272c; --accent: #8b9bff;
-      }
-      * { box-sizing: border-box; }
-      a { color: inherit; text-decoration: none; }
-      .serif { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
-      .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 56px; }
-
-      .top { display: flex; align-items: baseline; gap: 34px; padding: 26px 56px; max-width: 1120px; margin: 0 auto; }
-      .top b { font-family: "Instrument Serif", serif; font-weight: 400; font-size: 21px; margin-right: auto; }
-      .top nav { display: flex; gap: 26px; }
-      .top nav a { font-size: 14px; color: var(--mute); }
-      .top nav a:hover { color: var(--accent); }
-      .tt { background: none; border: 0; padding: 0; color: var(--mute); cursor: pointer; display: grid; place-items: center; }
-      .tt:hover { color: var(--accent); }
-
-      .hero { display: grid; grid-template-columns: 1fr 360px; gap: 40px; align-items: end; padding-top: 30px; }
-      .hero h1 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 124px; line-height: 0.88; letter-spacing: -0.02em; margin: 0 0 26px; }
-      .hero .lede { font-size: 22px; line-height: 1.45; max-width: 24ch; }
-      .hero .lede em { font-family: "Instrument Serif", serif; font-style: italic; color: var(--accent); font-size: 25px; }
-      .hero figure { margin: 0; position: relative; height: 380px; overflow: hidden; }
-      .hero img { width: 100%; height: 100%; object-fit: cover; object-position: center 28%; filter: grayscale(1) contrast(1.06); }
-      .hero figure::after { content: ""; position: absolute; inset: 0; background: var(--accent); mix-blend-mode: color; opacity: 0.24; }
-
-      .intro { border-top: 1px solid var(--ink); margin-top: 48px; padding-top: 22px; display: grid; grid-template-columns: 300px 1fr; gap: 40px; }
-      .intro span { font-size: 13px; color: var(--mute); }
-      .intro p { margin: 0; font-size: 20px; line-height: 1.55; max-width: 60ch; }
-
-      .sec { display: grid; grid-template-columns: 300px 1fr; gap: 40px; padding-block: 72px; border-top: 1px solid var(--line); }
-      .sec:first-of-type { border-top: 0; }
-      .sec > h2 { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 46px; line-height: 1; margin: 0; position: sticky; top: 24px; align-self: start; }
-      .sec > h2 small { display: block; font-family: Karla, sans-serif; font-style: normal; font-size: 13px; color: var(--mute); margin-top: 12px; letter-spacing: 0.01em; }
-      .body { min-width: 0; }
-      .body > p { margin: 0 0 20px; max-width: 62ch; }
-
-      .roles { margin: 34px 0 0; padding: 0; list-style: none; }
-      .roles li { display: grid; grid-template-columns: 150px 1fr; gap: 24px; padding: 16px 0; border-top: 1px solid var(--line); }
-      .roles .y { font-family: "Instrument Serif", serif; font-size: 22px; color: var(--mute); }
-      .roles b { font-weight: 600; font-size: 17px; display: block; }
-      .roles em { font-style: normal; font-size: 15px; color: var(--mute); }
-
-      .filters { display: flex; gap: 22px; margin-bottom: 4px; }
-      .fbtn { font: inherit; font-size: 15px; background: none; border: 0; padding: 0 0 3px; color: var(--mute); cursor: pointer; border-bottom: 1.5px solid transparent; }
-      .fbtn[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
-
-      .pubs { list-style: none; margin: 0; padding: 0; }
-      .pubs li { display: grid; grid-template-columns: 110px 1fr; gap: 24px; padding: 26px 0; border-top: 1px solid var(--line); }
-      .pubs .y { font-family: "Instrument Serif", serif; font-size: 40px; line-height: 1; color: var(--mute); font-variant-numeric: tabular-nums; }
-      .pubs li:hover .y { color: var(--accent); }
-      .pubs .t { font-family: "Instrument Serif", Georgia, serif; font-size: 27px; line-height: 1.18; display: block; max-width: 30ch; }
-      .pubs li:hover .t { color: var(--accent); }
-      .pubs .a { font-size: 14.5px; color: var(--mute); margin-top: 8px; }
-      .pubs .a b { color: var(--ink); font-weight: 600; }
-      .pubs .v { font-size: 13.5px; color: var(--mute); margin-top: 3px; font-style: italic; }
-      .is-out { display: none !important; }
-
-      .repos { list-style: none; margin: 0; padding: 0; }
-      .repos li { display: grid; grid-template-columns: 1fr 120px; gap: 24px; align-items: baseline; padding: 20px 0; border-top: 1px solid var(--line); }
-      .repos b { font-family: "Instrument Serif", serif; font-weight: 400; font-size: 25px; display: block; }
-      .repos li:hover b { color: var(--accent); }
-      .repos p { margin: 3px 0 0; font-size: 15.5px; color: var(--mute); max-width: 52ch; }
-      .repos i { font-style: normal; font-size: 13px; color: var(--mute); text-align: right; }
-
-      .terms { display: grid; gap: 0; }
-      .terms > div { padding: 18px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: baseline; }
-      .terms h3 { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; font-size: 21px; margin: 0; }
-      .terms p { margin: 0; font-size: 16px; color: var(--mute); }
-
-      .says { display: flex; flex-wrap: wrap; gap: 8px 34px; }
-      .says a { font-family: "Instrument Serif", Georgia, serif; font-size: 40px; line-height: 1.25; border-bottom: 1.5px solid var(--line); }
-      .says a:hover { color: var(--accent); border-color: var(--accent); }
-
-      .foot { border-top: 1px solid var(--line); padding-block: 26px 46px; display: flex; font-size: 13.5px; color: var(--mute); }
-      .foot span:last-child { margin-left: auto; }
-    `,
-    html: () => `
-      <header class="top">
-        <b>Sebastian Schenk</b>
-        <nav>${DATA.nav.map((n) => `<a href="#">${n}</a>`).join("")}</nav>
-        <button class="tt" data-theme-toggle aria-label="Toggle theme">${SUN}</button>
-      </header>
-
-      <div class="wrap">
-        <section class="hero">
-          <div>
-            <h1>Sebastian<br />Schenk</h1>
-            <p class="lede">Theoretical physicist, <em>reverse-engineering nature, approximately.</em></p>
-          </div>
-          <figure><img src="me.jpeg" alt="Sebastian Schenk" /></figure>
-        </section>
-
-        <div class="intro"><span>Currently at ${DATA.place}</span><p>${DATA.intro}</p></div>
-
-        <section class="sec">
-          <h2>About<small>Bio and positions held</small></h2>
-          <div class="body">
-            ${DATA.bio.map((p) => `<p>${p}</p>`).join("")}
-            <ul class="roles">${DATA.timeline
-              .map((t) => `<li><span class="y">${t.span}</span><span><b>${t.role}</b><em>${t.place}</em></span></li>`)
-              .join("")}</ul>
-          </div>
-        </section>
-
-        <section class="sec">
-          <h2>Papers<small>${DATA.pubTotal} of them, since 2014</small></h2>
-          <div class="body">
-            <div class="filters" data-filter-group>
-              <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">Recent</button>
-              <button class="fbtn" type="button" data-filter="all" aria-pressed="false">All</button>
-              <button class="fbtn" type="button" data-filter="all" aria-pressed="false">By year</button>
-            </div>
-            <ol class="pubs" data-pub-list>${DATA.pubs
-              .map(
-                (p, i) => `<li data-i="${i}"><span class="y">${p.year}</span><span>
-                  <a class="t" href="#">${p.title}</a>
-                  <div class="a">${me(p.authors)}</div>
-                  <div class="v">${p.venue} — arXiv:${p.arxiv}</div>
-                </span></li>`
-              )
-              .join("")}</ol>
-          </div>
-        </section>
-
-        <section class="sec">
-          <h2>Code<small>Side things and paper companions</small></h2>
-          <div class="body"><ul class="repos">${DATA.projects
-            .map((p) => `<li><span><b>${p.name}</b><p>${p.desc}</p></span><i>${p.lang}, ${p.year}</i></li>`)
-            .join("")}</ul></div>
-        </section>
-
-        <section class="sec">
-          <h2>Interests<small>The toolbox beyond the chalkboard</small></h2>
-          <div class="body"><div class="terms">${DATA.skills
-            .map((s) => `<div><h3>${s.group}</h3><p>${s.items.join(", ")}</p></div>`)
-            .join("")}</div></div>
-        </section>
-
-        <section class="sec">
-          <h2>Hello<small>Always up for a good problem</small></h2>
-          <div class="body"><div class="says">${DATA.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join("")}</div></div>
-        </section>
-
-        <footer class="foot"><span>Set in Instrument Serif and Karla</span><span>September 2026</span></footer>
-      </div>
-    `,
-  });
-
-  /* =====================================================================
      E — Field
      The radical one. The hero is a live two-source interference pattern
      drawn on a lattice of cells: constructive fringes in cyan, destructive
@@ -1369,6 +1198,472 @@
       }
       new ResizeObserver(() => size()).observe(cv);
     },
+  });
+
+  /* =====================================================================
+     F — Dossier
+     A different layout paradigm to everything above: the identity card is
+     fixed on the left and never leaves, so contact is always one click
+     away, and only the work scrolls. Swiss discipline, one family, and a
+     single red used sparingly enough that it still counts as an event.
+     ===================================================================== */
+  VARIANTS.push({
+    letter: "F",
+    name: "Dossier",
+    blurb: "A fixed identity card on the left that never scrolls away; only the work moves. Contact is permanently in view.",
+    notes: {
+      Typography: "Schibsted Grotesk alone, at four sizes — Swiss single-family discipline",
+      Palette: "paper and ink with one red, spent only on links and the status dot",
+      "Bold move": "there is no contact section, because contact is always on screen",
+      Risk: "the left panel eats a third of the width; needs a real stacked layout on phones",
+    },
+    css: `
+      :host {
+        --bg: #ffffff; --panel: #f2f2f0; --ink: #111112; --mute: #64646a;
+        --line: #dededa; --accent: #c1272d;
+        display: block; background: var(--bg); color: var(--ink);
+        font-family: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px; line-height: 1.6; font-variant-numeric: tabular-nums;
+      }
+      :host([data-t="dark"]) {
+        --bg: #0f0f10; --panel: #17171a; --ink: #ececea; --mute: #8b8b90;
+        --line: #26262a; --accent: #ff5a4d;
+      }
+      * { box-sizing: border-box; }
+      a { color: inherit; text-decoration: none; }
+      .shell { display: grid; grid-template-columns: 372px 1fr; min-height: 100%; background: linear-gradient(to right, var(--panel) 0 372px, var(--bg) 372px 100%); }
+
+      .card { position: sticky; top: 0; align-self: start; padding: 40px 38px 36px; border-right: 1px solid var(--line); }
+      .card img { width: 92px; height: 92px; object-fit: cover; border-radius: 3px; margin-bottom: 22px; }
+      .card h1 { font-size: 27px; font-weight: 700; letter-spacing: -0.025em; margin: 0; line-height: 1.1; }
+      .card .role { font-size: 15px; margin: 6px 0 2px; }
+      .card .place { font-size: 14px; color: var(--mute); margin: 0; }
+      .card .status { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--mute); margin-top: 18px; }
+      .card .status i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); font-style: normal; }
+      .hr { height: 1px; background: var(--line); margin: 26px 0; }
+      .lbl { font-size: 11px; letter-spacing: 0.1em; color: var(--mute); margin-bottom: 11px; }
+      .card nav { display: grid; gap: 3px; }
+      .card nav a { font-size: 15px; display: flex; justify-content: space-between; padding: 3px 0; }
+      .card nav a::after { content: attr(data-n); color: var(--mute); font-size: 13px; }
+      .card nav a:hover, .card nav a.on { color: var(--accent); }
+      .reach { display: grid; gap: 1px; }
+      .reach a { display: grid; grid-template-columns: 98px 1fr; gap: 12px; padding: 7px 0; font-size: 14px; border-top: 1px solid var(--line); }
+      .reach a:first-child { border-top: 0; }
+      .reach a span:first-child { color: var(--mute); font-size: 13px; }
+      .reach a:hover span:last-child { color: var(--accent); }
+      .tt { margin-top: 26px; background: none; border: 1px solid var(--line); border-radius: 3px; color: var(--mute); font: inherit; font-size: 13px; padding: 5px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+      .tt:hover { color: var(--accent); border-color: var(--accent); }
+
+      .work { padding: 44px 56px 56px; min-width: 0; }
+      .lede { font-size: 22px; line-height: 1.45; letter-spacing: -0.015em; max-width: 34ch; margin: 0 0 4px; }
+      .sec { padding-block: 42px; border-top: 1px solid var(--line); margin-top: 38px; }
+      .sec:first-of-type { margin-top: 30px; }
+      .sec__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px; }
+      .sec__head h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; margin: 0; }
+      .sec__head span { margin-left: auto; font-size: 13px; color: var(--mute); }
+      .sec p { margin: 0 0 15px; color: var(--mute); max-width: 62ch; font-size: 16px; }
+
+      .roles { display: grid; }
+      .roles div { display: grid; grid-template-columns: 132px 1fr 1fr; gap: 20px; padding: 13px 0; border-top: 1px solid var(--line); font-size: 15px; }
+      .roles div:first-child { border-top: 0; }
+      .roles span:first-child { color: var(--mute); font-size: 14px; }
+      .roles b { font-weight: 600; }
+      .roles em { font-style: normal; color: var(--mute); }
+
+      .filters { display: flex; gap: 22px; margin-bottom: 6px; }
+      .fbtn { font: inherit; font-size: 14px; background: none; border: 0; padding: 0 0 4px; color: var(--mute); cursor: pointer; border-bottom: 2px solid transparent; }
+      .fbtn[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+
+      .pubs { list-style: none; margin: 0; padding: 0; }
+      .pubs li { display: grid; grid-template-columns: 58px 1fr 170px; gap: 22px; padding: 16px 0; border-top: 1px solid var(--line); }
+      .pubs .y { color: var(--mute); font-size: 14px; }
+      .pubs .t { font-size: 16.5px; font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; }
+      .pubs li:hover .t { color: var(--accent); }
+      .pubs .a { font-size: 13.5px; color: var(--mute); margin-top: 4px; }
+      .pubs .a b { color: var(--ink); font-weight: 600; }
+      .pubs .v { font-size: 13px; color: var(--mute); text-align: right; line-height: 1.45; }
+      .pubs .v a { color: var(--accent); }
+      .is-out { display: none !important; }
+
+      .repos { display: grid; }
+      .repos a { display: grid; grid-template-columns: 170px 1fr 120px; gap: 22px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--line); }
+      .repos b { font-size: 16px; font-weight: 600; }
+      .repos a:hover b { color: var(--accent); }
+      .repos span { font-size: 15px; color: var(--mute); }
+      .repos i { font-style: normal; font-size: 13px; color: var(--mute); text-align: right; }
+
+      .terms { display: grid; }
+      .terms div { display: grid; grid-template-columns: 200px 1fr; gap: 22px; padding: 13px 0; border-top: 1px solid var(--line); }
+      .terms b { font-weight: 600; font-size: 15px; }
+      .terms span { font-size: 15px; color: var(--mute); }
+    `,
+    html: () => `
+      <div class="shell">
+        <aside class="card">
+          <img src="me.jpeg" alt="Sebastian Schenk" />
+          <h1>Sebastian Schenk</h1>
+          <p class="role">${DATA.role}</p>
+          <p class="place">${DATA.place}, DE</p>
+          <p class="status"><i></i>Open to collaboration</p>
+
+          <div class="hr"></div>
+          <nav>${DATA.nav
+            .slice(0, 4)
+            .map((n, i) => `<a href="#" class="${i === 1 ? "on" : ""}" data-n="${i === 1 ? DATA.pubTotal : i === 2 ? DATA.projects.length : ""}">${n}</a>`)
+            .join("")}</nav>
+
+          <div class="hr"></div>
+          <p class="lbl">REACH ME</p>
+          <div class="reach">${DATA.links
+            .map((l) => `<a href="${l.href}"><span>${l.label}</span><span>${l.kind === "email" ? "write" : l.kind === "matrix" ? "chat" : "profile"}</span></a>`)
+            .join("")}</div>
+
+          <button class="tt" data-theme-toggle aria-label="Toggle theme">${SUN}<span>Theme</span></button>
+        </aside>
+
+        <div class="work">
+          <p class="lede">${DATA.tagline} I work on quantum field theory and its less tractable corners — and lately on quantum information technology.</p>
+
+          <section class="sec">
+            <div class="sec__head"><h2>About</h2><span>Bio and positions</span></div>
+            ${DATA.bio.map((p) => `<p>${p}</p>`).join("")}
+            <div class="roles" style="margin-top:26px">${DATA.timeline
+              .map((t) => `<div><span>${t.span}</span><b>${t.role}</b><em>${t.place}</em></div>`)
+              .join("")}</div>
+          </section>
+
+          <section class="sec">
+            <div class="sec__head"><h2>Publications</h2><span>${DATA.pubTotal} since 2014</span></div>
+            <div class="filters" data-filter-group>
+              <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">Recent</button>
+              <button class="fbtn" type="button" data-filter="all" aria-pressed="false">All</button>
+              <button class="fbtn" type="button" data-filter="all" aria-pressed="false">By year</button>
+            </div>
+            <ol class="pubs" data-pub-list>${DATA.pubs
+              .map(
+                (p, i) => `<li data-i="${i}"><span class="y">${p.year}</span><span>
+                  <span class="t">${p.title}</span>
+                  <div class="a">${me(p.authors)}</div>
+                </span><span class="v">${p.venue}<br /><a href="#">arXiv:${p.arxiv}</a></span></li>`
+              )
+              .join("")}</ol>
+          </section>
+
+          <section class="sec">
+            <div class="sec__head"><h2>Code</h2><span>github.com/schenkse</span></div>
+            <div class="repos">${DATA.projects
+              .map((p) => `<a href="#"><b>${p.name}</b><span>${p.desc}</span><i>${p.lang} · ${p.year}</i></a>`)
+              .join("")}</div>
+          </section>
+
+          <section class="sec">
+            <div class="sec__head"><h2>Interests</h2><span>Beyond the chalkboard</span></div>
+            <div class="terms">${DATA.skills
+              .map((s) => `<div><b>${s.group}</b><span>${s.items.join(", ")}</span></div>`)
+              .join("")}</div>
+          </section>
+        </div>
+      </div>
+    `,
+  });
+
+  /* =====================================================================
+     G — Plain
+     The anti-design design, and the one that matches his own stated taste:
+     build complex things as simply as possible. One column, no nav bar, no
+     cards, no web fonts at all — so it needs no CSP change and loads in one
+     request. Everything on the page is content.
+     ===================================================================== */
+  VARIANTS.push({
+    letter: "G",
+    name: "Plain",
+    blurb: "No chrome, no cards, no web fonts — one column of well-set text. Loads in a single request and needs no CSP change.",
+    notes: {
+      Typography: "the system UI stack, set carefully. Zero font requests",
+      Palette: "paper, ink, and a link blue that has meant 'link' for thirty years",
+      "Bold move": "deleting the navigation, the hero and the sections chrome entirely",
+      Risk: "reads as understated; there is no visual hook to remember it by",
+    },
+    css: `
+      :host {
+        --bg: #fdfdfc; --ink: #1a1a19; --mute: #6a6a66; --line: #e3e3de; --accent: #0b5fbd;
+        display: block; background: var(--bg); color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px; line-height: 1.72;
+      }
+      :host([data-t="dark"]) {
+        --bg: #131314; --ink: #e6e6e3; --mute: #92928d; --line: #2b2b2c; --accent: #7fb0f5;
+      }
+      * { box-sizing: border-box; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .page { max-width: 680px; margin: 0 auto; padding: 72px 28px 90px; }
+
+      h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 4px; }
+      .sub { color: var(--mute); margin: 0 0 26px; font-size: 17px; }
+      p { margin: 0 0 18px; }
+      .meta { font-size: 15px; color: var(--mute); margin: 0 0 34px; }
+      .meta a { margin-right: 4px; }
+
+      h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; margin: 44px 0 14px; padding-top: 22px; border-top: 1px solid var(--line); }
+      h2:first-of-type { margin-top: 38px; }
+
+      ul, ol { margin: 0 0 18px; padding-left: 0; list-style: none; }
+      .roles li { display: grid; grid-template-columns: 128px 1fr; gap: 14px; padding: 5px 0; font-size: 16px; }
+      .roles span { color: var(--mute); font-size: 15px; }
+      .roles em { font-style: normal; color: var(--mute); }
+
+      .filters { font-size: 15px; color: var(--mute); margin-bottom: 12px; }
+      .fbtn { font: inherit; background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; margin-right: 12px; }
+      .fbtn:hover { text-decoration: underline; }
+      .fbtn[aria-pressed="true"] { color: var(--ink); font-weight: 600; cursor: default; text-decoration: none; }
+
+      .pubs li { padding: 11px 0; font-size: 16px; line-height: 1.5; }
+      .pubs .t { font-weight: 600; }
+      .pubs .a { color: var(--mute); font-size: 15px; }
+      .pubs .a b { color: var(--ink); font-weight: 600; }
+      .pubs .v { color: var(--mute); font-size: 15px; }
+      .is-out { display: none !important; }
+
+      .repos li { padding: 9px 0; font-size: 16px; }
+      .repos b { font-weight: 600; }
+      .repos span { color: var(--mute); }
+
+      .terms li { padding: 5px 0; font-size: 16px; }
+      .terms b { font-weight: 600; }
+      .terms span { color: var(--mute); }
+
+      footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--mute); display: flex; gap: 16px; }
+      .tt { margin-left: auto; background: none; border: 0; padding: 0; font: inherit; font-size: 14px; color: var(--accent); cursor: pointer; }
+      .tt:hover { text-decoration: underline; }
+    `,
+    html: () => `
+      <div class="page">
+        <h1>Sebastian Schenk</h1>
+        <p class="sub">${DATA.role} at ${DATA.place}, Karlsruhe.</p>
+        <p>${DATA.intro}</p>
+        <p class="meta">${DATA.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join(" &nbsp;·&nbsp; ")}</p>
+
+        <h2>About</h2>
+        ${DATA.bio.map((p) => `<p>${p}</p>`).join("")}
+        <ul class="roles">${DATA.timeline
+          .map((t) => `<li><span>${t.span}</span><span>${t.role}, <em>${t.place}</em></span></li>`)
+          .join("")}</ul>
+
+        <h2>Publications</h2>
+        <p class="filters" data-filter-group>
+          Showing
+          <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">recent</button>
+          <button class="fbtn" type="button" data-filter="all" aria-pressed="false">all ${DATA.pubTotal}</button>
+          <button class="fbtn" type="button" data-filter="all" aria-pressed="false">by year</button>
+        </p>
+        <ol class="pubs" data-pub-list>${DATA.pubs
+          .map(
+            (p, i) => `<li data-i="${i}">
+              <span class="t">${p.title}</span><br />
+              <span class="a">${me(p.authors)}</span><br />
+              <span class="v">${p.year} · ${p.venue} · <a href="#">arXiv:${p.arxiv}</a></span>
+            </li>`
+          )
+          .join("")}</ol>
+
+        <h2>Code</h2>
+        <ul class="repos">${DATA.projects
+          .map((p) => `<li><a href="#"><b>${p.name}</b></a> — <span>${p.desc} (${p.lang})</span></li>`)
+          .join("")}</ul>
+
+        <h2>Interests</h2>
+        <ul class="terms">${DATA.skills
+          .map((s) => `<li><b>${s.group}:</b> <span>${s.items.join(", ")}</span></li>`)
+          .join("")}</ul>
+
+        <footer>
+          <span>Hand-written HTML. No build step, no fonts to fetch.</span>
+          <button class="tt" data-theme-toggle>Dark</button>
+        </footer>
+      </div>
+    `,
+  });
+
+  /* =====================================================================
+     H — Risograph
+     The loud one. Two flat spot inks on a paper ground, overprinting where
+     they cross, with a halftone dot screen over the hero — the way a
+     two-colour print actually behaves. Anton carries the noise; everything
+     underneath it stays as plain as G.
+     ===================================================================== */
+  VARIANTS.push({
+    letter: "H",
+    name: "Risograph",
+    blurb: "Two flat spot inks that overprint where they overlap, plus a halftone screen. Loud and printed, not glossy and generated.",
+    notes: {
+      Typography: "Anton for the shouting, Karla for everything that has to be read",
+      Palette: "riso green and riso orange on a cool paper; they multiply to olive",
+      "Bold move": "real overprint — the inks blend where shapes cross, as on press",
+      Risk: "the loudest option; the joke wears out if the copy isn't short",
+    },
+    css: `
+      :host {
+        --bg: #eceee7; --paper: #f6f7f2; --ink: #16180f; --mute: #62675a;
+        --line: #d3d7c9; --i1: #00a95c; --i2: #ff6c2f; --blend: multiply; --on-ink: #16180f;
+        display: block; background: var(--bg); color: var(--ink);
+        font-family: Karla, ui-sans-serif, system-ui, sans-serif; font-size: 16.5px; line-height: 1.6;
+      }
+      :host([data-t="dark"]) {
+        --bg: #101309; --paper: #171b0f; --ink: #eaeee0; --mute: #8c9280;
+        --line: #262b1a; --i1: #3ee08d; --i2: #ff8a4f; --blend: screen; --on-ink: #101309;
+      }
+      * { box-sizing: border-box; }
+      a { color: inherit; text-decoration: none; }
+      .display { font-family: Anton, Impact, sans-serif; font-weight: 400; letter-spacing: 0.005em; }
+      .wrap { padding-inline: 48px; }
+
+      .top { display: flex; align-items: center; gap: 26px; padding: 18px 48px; border-bottom: 3px solid var(--ink); }
+      .top b { font-family: Anton, sans-serif; font-weight: 400; font-size: 19px; letter-spacing: 0.02em; margin-right: auto; }
+      .top nav { display: flex; gap: 20px; }
+      .top nav a { font-size: 14px; font-weight: 600; }
+      .top nav a:hover { color: var(--i2); }
+      .tt { background: none; border: 0; padding: 0; color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+      .tt:hover { color: var(--i2); }
+
+      .hero { position: relative; overflow: hidden; padding: 56px 48px 52px; border-bottom: 3px solid var(--ink); }
+      .hero::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(var(--ink) 1.1px, transparent 1.1px); background-size: 7px 7px; opacity: 0.1; pointer-events: none; }
+      .blob { position: absolute; border-radius: 50%; mix-blend-mode: var(--blend); }
+      .blob--a { width: 330px; height: 330px; background: var(--i1); right: 120px; top: -70px; }
+      .blob--b { width: 250px; height: 250px; background: var(--i2); right: 40px; top: 96px; }
+      .hero__in { position: relative; z-index: 1; }
+      .hero h1 { font-family: Anton, sans-serif; font-weight: 400; font-size: 92px; line-height: 0.92; margin: 0 0 20px; max-width: 11ch; }
+      .hero h1 mark { background: var(--i1); color: var(--on-ink); padding: 0 8px; mix-blend-mode: var(--blend); }
+      .hero p { font-size: 19px; max-width: 40ch; margin: 0; font-weight: 500; }
+      .hero .facts { display: flex; gap: 30px; margin-top: 30px; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+      .hero .facts span { border: 2px solid var(--ink); border-radius: 999px; padding: 4px 14px; }
+
+      .sec { padding-block: 48px; border-bottom: 3px solid var(--ink); }
+      .sec__head { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; }
+      .sec__head h2 { font-family: Anton, sans-serif; font-weight: 400; font-size: 34px; margin: 0; letter-spacing: 0.01em; }
+      .sec__head span { margin-left: auto; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--mute); }
+
+      .two { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 46px; }
+      .two p { margin: 0 0 16px; max-width: 54ch; }
+      .roles { list-style: none; margin: 0; padding: 0; }
+      .roles li { display: grid; grid-template-columns: 124px 1fr; gap: 16px; padding: 12px 0; border-top: 2px solid var(--line); }
+      .roles .y { font-family: Anton, sans-serif; font-size: 17px; color: var(--i1); letter-spacing: 0.02em; }
+      .roles b { font-weight: 700; display: block; }
+      .roles em { font-style: normal; color: var(--mute); font-size: 15px; }
+
+      .filters { display: flex; gap: 10px; margin-bottom: 18px; }
+      .fbtn { font: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; background: none; border: 2px solid var(--ink); border-radius: 999px; padding: 4px 15px; cursor: pointer; color: var(--ink); }
+      .fbtn[aria-pressed="true"] { background: var(--i2); color: var(--on-ink); border-color: var(--i2); }
+
+      .pubs { list-style: none; margin: 0; padding: 0; }
+      .pubs li { display: grid; grid-template-columns: 78px 1fr 200px; gap: 22px; padding: 18px 0; border-top: 2px solid var(--line); align-items: baseline; }
+      .pubs .y { font-family: Anton, sans-serif; font-size: 22px; letter-spacing: 0.02em; }
+      .pubs .t { font-size: 19px; font-weight: 700; line-height: 1.3; }
+      .pubs li:hover .t { color: var(--i2); }
+      .pubs .a { font-size: 14px; color: var(--mute); margin-top: 5px; }
+      .pubs .a b { color: var(--ink); font-weight: 700; }
+      .pubs .v { font-size: 13.5px; color: var(--mute); text-align: right; line-height: 1.45; }
+      .is-out { display: none !important; }
+
+      .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .tile { background: var(--paper); border: 3px solid var(--ink); padding: 20px; box-shadow: 7px 7px 0 var(--i1); }
+      .tile:nth-child(even) { box-shadow: 7px 7px 0 var(--i2); }
+      .tile b { font-family: Anton, sans-serif; font-weight: 400; font-size: 21px; display: block; letter-spacing: 0.01em; }
+      .tile p { margin: 8px 0 14px; font-size: 14.5px; color: var(--mute); line-height: 1.5; }
+      .tile i { font-style: normal; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+
+      .terms { display: grid; gap: 14px; }
+      .terms__row { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: baseline; }
+      .terms__row > b { font-family: Anton, sans-serif; font-weight: 400; font-size: 16px; letter-spacing: 0.02em; }
+      .terms__row > div { display: flex; flex-wrap: wrap; gap: 8px; }
+      .pill { font-size: 13.5px; font-weight: 600; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; }
+      .pill:nth-child(3n) { border-color: var(--i1); }
+      .pill:nth-child(3n + 2) { border-color: var(--i2); }
+
+      .hello { display: grid; grid-template-columns: 1fr 1fr; gap: 46px; align-items: start; }
+      .hello h2 { font-family: Anton, sans-serif; font-weight: 400; font-size: 62px; line-height: 0.95; margin: 0; }
+      .hello h2 mark { background: var(--i2); color: var(--on-ink); padding: 0 8px; mix-blend-mode: var(--blend); }
+      .cl { display: grid; gap: 10px; }
+      .cl a { display: flex; justify-content: space-between; border: 2px solid var(--ink); padding: 11px 16px; font-weight: 700; font-size: 15px; }
+      .cl a:hover { background: var(--i1); color: var(--on-ink); }
+      .cl a span:last-child { font-weight: 400; color: var(--mute); }
+      .cl a:hover span:last-child { color: var(--on-ink); }
+
+      .foot { padding-block: 20px 40px; display: flex; font-size: 13px; font-weight: 600; color: var(--mute); }
+      .foot span:last-child { margin-left: auto; }
+    `,
+    html: () => `
+      <header class="top">
+        <b>Sebastian Schenk</b>
+        <nav>${DATA.nav.map((n) => `<a href="#">${n}</a>`).join("")}</nav>
+        <button class="tt" data-theme-toggle aria-label="Toggle theme">${SUN}</button>
+      </header>
+
+      <section class="hero">
+        <span class="blob blob--a"></span>
+        <span class="blob blob--b"></span>
+        <div class="hero__in">
+          <h1>Reverse-engineering <mark>nature</mark>, approximately</h1>
+          <p>Theoretical physicist. Instantons, resurgence and tunnelling — and lately the same taste for hard problems applied to quantum information technology.</p>
+          <div class="facts"><span>${DATA.pubTotal} PAPERS</span><span>SINCE 2014</span><span>KARLSRUHE, DE</span><span>OPEN TO COLLABORATION</span></div>
+        </div>
+      </section>
+
+      <div class="wrap">
+        <section class="sec">
+          <div class="sec__head"><h2>About</h2><span>BIO + POSITIONS</span></div>
+          <div class="two">
+            <div>${DATA.bio.map((p) => `<p>${p}</p>`).join("")}</div>
+            <ul class="roles">${DATA.timeline
+              .map((t) => `<li><span class="y">${t.span}</span><span><b>${t.role}</b><em>${t.place}</em></span></li>`)
+              .join("")}</ul>
+          </div>
+        </section>
+
+        <section class="sec">
+          <div class="sec__head"><h2>Papers</h2><span>${DATA.pubTotal} TOTAL</span></div>
+          <div class="filters" data-filter-group>
+            <button class="fbtn" type="button" data-filter="recent" aria-pressed="true">RECENT</button>
+            <button class="fbtn" type="button" data-filter="all" aria-pressed="false">ALL</button>
+            <button class="fbtn" type="button" data-filter="all" aria-pressed="false">BY YEAR</button>
+          </div>
+          <ol class="pubs" data-pub-list>${DATA.pubs
+            .map(
+              (p, i) => `<li data-i="${i}"><span class="y">${p.year}</span><span>
+                <a class="t" href="#">${p.title}</a>
+                <div class="a">${me(p.authors)}</div>
+              </span><span class="v">${p.venue}<br />arXiv:${p.arxiv}</span></li>`
+            )
+            .join("")}</ol>
+        </section>
+
+        <section class="sec">
+          <div class="sec__head"><h2>Code</h2><span>GITHUB.COM/SCHENKSE</span></div>
+          <div class="tiles">${DATA.projects
+            .map((p) => `<a class="tile" href="#"><b>${p.name}</b><p>${p.desc}</p><i>${p.lang.toUpperCase()} — ${p.year}</i></a>`)
+            .join("")}</div>
+        </section>
+
+        <section class="sec">
+          <div class="sec__head"><h2>Interests</h2><span>BEYOND THE CHALKBOARD</span></div>
+          <div class="terms">${DATA.skills
+            .map((s) => `<div class="terms__row"><b>${s.group}</b><div>${s.items.map((i) => `<span class="pill">${i}</span>`).join("")}</div></div>`)
+            .join("")}</div>
+        </section>
+
+        <section class="sec" style="border-bottom:0">
+          <div class="sec__head"><h2>Hello</h2><span>WHICHEVER IS EASIEST</span></div>
+          <div class="hello">
+            <h2>Send me a <mark>hard problem</mark></h2>
+            <div class="cl">${DATA.links
+              .map((l) => `<a href="${l.href}"><span>${l.label}</span><span>${l.kind === "email" || l.kind === "matrix" ? "assembled at runtime" : "open"}</span></a>`)
+              .join("")}</div>
+          </div>
+        </section>
+
+        <footer class="foot"><span>Hand-written HTML, no build step</span><span>September 2026</span></footer>
+      </div>
+    `,
   });
 
   /* =====================================================================
