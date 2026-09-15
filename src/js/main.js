@@ -7,7 +7,7 @@
  *
  * Behaviors (each `init*` no-ops when its root markup is absent):
  *   theme toggle · interference plate · contact obfuscation ·
- *   publication filter · projects · interests · footer date.
+ *   publication filter · projects · interests.
  *
  * Boot order is defined at the bottom of the file. The async features
  * (publications, projects, interests) fetch their content from src/data/*.json.
@@ -314,8 +314,8 @@
    *    pdf     {string}            URL or relative path; unsafe schemes neutralized
    * ---------------------------------------------------------- */
   /**
-   * Render a list of publications into `list`, one entry per line: title,
-   * authors, then a meta line of year, venue and links.
+   * Render a list of publications into `list`: the year in the shared left
+   * gutter, then title, authors and a meta line of venue and links.
    * arxiv/doi accept bare IDs (expanded to canonical URLs) or full URLs; every
    * href is built via safeUrl(), which neutralizes javascript:/data:/vbscript:.
    * @param {object[]} items - Publications to render.
@@ -340,6 +340,10 @@
       li.style.viewTransitionName =
         "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
 
+      const year = document.createElement("span");
+      year.className = "gutter";
+      year.textContent = String(p.year);
+
       const title = document.createElement("span");
       title.className = "pub__title";
       title.textContent = p.title;
@@ -351,45 +355,48 @@
         : String(p.authors || "").split(/,\s*/);
       authors.textContent = authorList.join(", ");
 
+      // Several entries have no journal, so the parts are collected first and
+      // joined — appending a separator per part would leave a stray one.
+      const parts = [];
+      const venueText = p.venue || p.journal;
+      if (venueText) parts.push(venueText);
+      if (p.arxiv) parts.push(makeLink(safeUrl(p.arxiv, "https://arxiv.org/abs/"), "arXiv"));
+      if (p.doi) parts.push(makeLink(safeUrl(p.doi, "https://doi.org/"), "DOI"));
+      // No base, so absolute http(s) URLs and relative in-repo PDF paths both pass.
+      if (p.pdf) parts.push(makeLink(safeUrl(p.pdf), "PDF"));
+
       const meta = document.createElement("span");
       meta.className = "pub__meta";
-      meta.append(String(p.year));
-      const venueText = p.venue || p.journal;
-      if (venueText) meta.append(" · " + venueText);
-      if (p.arxiv) {
-        meta.append(" · ");
-        meta.appendChild(makeLink(safeUrl(p.arxiv, "https://arxiv.org/abs/"), "arXiv"));
-      }
-      if (p.doi) {
-        meta.append(" · ");
-        meta.appendChild(makeLink(safeUrl(p.doi, "https://doi.org/"), "DOI"));
-      }
-      if (p.pdf) {
-        meta.append(" · ");
-        // No base, so absolute http(s) URLs and relative in-repo PDF paths both pass.
-        meta.appendChild(makeLink(safeUrl(p.pdf), "PDF"));
-      }
+      parts.forEach((part, i) => {
+        if (i) meta.append(" · ");
+        meta.append(part);
+      });
 
-      li.append(title, authors, meta);
+      // One wrapper, so the entry is two grid children like every other list.
+      const body = document.createElement("div");
+      body.append(title, authors, meta);
+
+      li.append(year, body);
       frag.appendChild(li);
     });
     list.appendChild(frag);
   }
 
   /**
-   * Load and wire up the filterable publication list.
+   * Load and wire up the publication list.
    *
    * Sorting: by year descending, ties broken by arXiv ID (YYMM.NNNNN) descending,
    * so "recent" is correct regardless of the JSON's order.
    *
-   * Filter modes: "recent" (first 3, default) and "all". The active filter is
-   * mirrored in the URL query and read back on load: ?pub=all, else recent.
-   * writeUrl() uses history.replaceState and keeps the #publications hash.
+   * Views: "recent" (first 3, default) and "all", swapped by the single link
+   * below the list. The view is mirrored in the URL query and read back on
+   * load: ?pub=all, else recent. writeUrl() uses history.replaceState and keeps
+   * the #publications hash.
    */
   async function initPublications() {
     const list = $("[data-pub-list]");
-    const filterRow = $("[data-pub-filters]");
-    if (!list || !filterRow) return;
+    const toggle = $("[data-pub-toggle]");
+    if (!list || !toggle) return;
 
     let data;
     try {
@@ -413,8 +420,6 @@
     };
     data.sort((a, b) => b.year - a.year || arxivKey(b).localeCompare(arxivKey(a)));
 
-    const filters = $$(".filter", filterRow);
-
     const readUrl = () =>
       new URLSearchParams(location.search).get("pub") === "all" ? "all" : "recent";
 
@@ -426,19 +431,20 @@
     let mode = readUrl();
 
     const applyFilter = () => {
-      renderPublications(mode === "all" ? data : data.slice(0, 3), list);
-      filters.forEach((b) => {
-        b.setAttribute("aria-pressed", String(b.dataset.filter === mode));
-      });
+      const all = mode === "all";
+      renderPublications(all ? data : data.slice(0, 3), list);
+      toggle.textContent = all ? "Show fewer" : "Show all " + data.length + " publications";
+      toggle.setAttribute("aria-expanded", String(all));
     };
 
-    filterRow.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-filter]");
-      if (!btn || btn.dataset.filter === mode) return;
-      mode = btn.dataset.filter;
+    toggle.addEventListener("click", () => {
+      mode = mode === "all" ? "recent" : "all";
       writeUrl();
       withViewTransition(applyFilter, "pub");
     });
+
+    // With three or fewer papers the list is never truncated, so nothing to open.
+    if (data.length <= 3) toggle.parentElement.hidden = true;
 
     applyFilter();
   }
@@ -451,9 +457,14 @@
    *    url {string} (scheme-less values get https:// prefixed) · year {number}
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/projects.json and render it as a plain list, newest first:
-   * the linked name, then the description. `tags` stays in the JSON but is not
-   * rendered — the language labels crowded the line without earning it.
+   * Load src/data/projects.json and render it newest first: the linked name,
+   * then the description.
+   *
+   * This is the one list whose gutter stays empty. A project's name is its own
+   * scan key and already starts the line, and both candidate labels — the year
+   * and the language — only repeat what the line says. The column is kept so
+   * the names align with every other list; see .repos li in main.css.
+   * `year` sorts the list, and `tags` is not rendered at all.
    */
   async function initProjects() {
     const list = $("[data-project-list]");
@@ -489,7 +500,10 @@
       const rest = document.createElement("span");
       rest.textContent = " — " + p.description;
 
-      li.append(link, rest);
+      const body = document.createElement("span");
+      body.append(link, rest);
+
+      li.append(body);
       frag.appendChild(li);
     });
     list.appendChild(frag);
@@ -501,8 +515,9 @@
    *  JSON: src/data/skills.json — an object of { group: string[] }.
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/skills.json and render one line per group: the group name,
-   * then its items as a comma-separated list. Empty groups are skipped.
+   * Load src/data/skills.json and render one line per group: the group name in
+   * the shared left gutter, then its items as a comma-separated list. Empty
+   * groups are skipped.
    */
   async function initInterests() {
     const list = $("[data-skills]");
@@ -527,10 +542,11 @@
       .filter(([, items]) => Array.isArray(items) && items.length)
       .forEach(([label, items]) => {
         const li = document.createElement("li");
-        const name = document.createElement("b");
-        name.textContent = label + ":";
+        const name = document.createElement("span");
+        name.className = "gutter";
+        name.textContent = label;
         const values = document.createElement("span");
-        values.textContent = " " + items.join(", ");
+        values.textContent = items.join(", ");
         li.append(name, values);
         frag.appendChild(li);
       });

@@ -34,6 +34,17 @@
 
   /* Layout */
   --measure: 680px;           /* the single content column */
+  --pad-x: 28px;              /* the column's side padding — not vertical rhythm */
+
+  /* Vertical rhythm — every margin and padding down the page is one of these. */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 20px;
+  --s5: 32px;
+  --s6: 48px;
+  --s7: 64px;
+  --s8: 80px;
 }
 
 /* Dark theme — overrides the color tokens only. */
@@ -127,84 +138,83 @@ a:hover {
   margin: 0 auto;
   /* The top padding is the whole gap between the plate and the name; the
      column starts on the h1, with nothing captioning the ornament. */
-  padding: 66px 28px 90px;
+  padding: var(--s7) var(--pad-x) var(--s8);
 }
 
 h1 {
   font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin: 0 0 4px;
+  margin: 0 0 var(--s1);
   line-height: 1.25;
 }
 
 .lede {
   color: var(--muted);
   font-size: 17px;
-  margin: 0 0 26px;
+  margin: 0 0 var(--s4);
 }
 
 p {
-  margin: 0 0 18px;
+  margin: 0 0 var(--s4);
 }
 
 /* Contact sits here rather than in a section of its own: the links are
    short enough to carry inline, so they run as one muted sentence separated
    by middle dots, and the page then needs no footer CTA. */
 .reach {
-  margin: 0 0 34px;
+  margin: 0 0 var(--s5);
   font-size: 15px;
   color: var(--muted);
 }
 
-.reach a {
-  margin-right: 4px;
-}
-
-/* A hairline above each heading is the page's only structural device. */
+/* A hairline above each heading is the page's only structural device; the
+   heading itself is body size, set apart by weight rather than by shrinking. */
 h2 {
-  font-size: 15px;
+  font-size: inherit;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  margin: 44px 0 14px;
-  padding-top: 22px;
+  margin: var(--s6) 0 var(--s3);
+  padding-top: var(--s4);
   border-top: 1px solid var(--border);
-  scroll-margin-top: 16px;
-}
-
-/* The link row already leaves a gap below it, so the first heading sits closer. */
-h2:first-of-type {
-  margin-top: 38px;
+  scroll-margin-top: var(--s3);
 }
 
 ul,
 ol {
-  margin: 0 0 18px;
+  margin: 0 0 var(--s4);
   padding-left: 0;
   list-style: none;
 }
 
-.empty-state {
-  color: var(--muted);
-  font-size: 15px;
-}
-
 /* ============================================================
-   About — positions held
+   Lists — one grammar for all four
+
+   Every list on the page is a label in the left gutter and its content on
+   the right, so they all share one grid and the content of the whole page
+   starts at the same x. The label is a year or a one-word category.
    ============================================================ */
 
-.roles li {
+.roles li,
+.pubs li,
+.repos li,
+.terms li {
   display: grid;
   grid-template-columns: 128px 1fr;
-  gap: 4px 14px;
-  padding: 5px 0;
-  font-size: 16px;
+  gap: var(--s1) var(--s3);
+  padding: var(--s2) 0;
 }
 
-.roles__when {
+.gutter {
   color: var(--muted);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Loading and error rows have no gutter label, so they ignore the grid. */
+li.empty-state {
+  display: block;
+  color: var(--muted);
+  font-size: 15px;
 }
 
 .roles em {
@@ -216,19 +226,16 @@ ol {
    Publications
    ============================================================ */
 
-.filters {
-  margin-bottom: 12px;
+.pub-more {
   font-size: 15px;
-  color: var(--muted);
 }
 
-/* The filters read as a sentence, so they are set as links, not controls. */
+/* The one control on the page reads as a sentence, so it is set as a link. */
 .filter {
   font: inherit;
   background: none;
   border: 0;
   padding: 0;
-  margin-right: 12px;
   color: var(--accent);
   cursor: pointer;
 }
@@ -237,16 +244,9 @@ ol {
   text-decoration: underline;
 }
 
-.filter[aria-pressed="true"] {
-  color: var(--text);
-  font-weight: 600;
-  text-decoration: none;
-  cursor: default;
-}
-
+/* Three lines per entry, so they need more air than the other lists. */
 .pubs li {
-  padding: 11px 0;
-  font-size: 16px;
+  padding: var(--s3) 0;
   line-height: 1.5;
 }
 
@@ -266,29 +266,17 @@ ol {
    Code and interests
    ============================================================ */
 
-.repos li {
-  padding: 9px 0;
-  font-size: 16px;
+/* The only list with an empty gutter: a project's name is its own scan key, so
+   the column is kept for alignment and the single child skips to it. */
+.repos li > * {
+  grid-column: 2;
 }
 
 .repos b {
   font-weight: 600;
 }
 
-.repos span {
-  color: var(--muted);
-}
-
-.terms li {
-  padding: 5px 0;
-  font-size: 16px;
-}
-
-.terms b {
-  font-weight: 600;
-}
-
-.terms span {
+.repos a + span {
   color: var(--muted);
 }
 
@@ -297,13 +285,13 @@ ol {
    ============================================================ */
 
 .foot {
-  margin-top: 48px;
-  padding-top: 20px;
+  margin-top: var(--s6);
+  padding-top: var(--s4);
   border-top: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
-  font-size: 14px;
+  gap: var(--s1) var(--s3);
+  font-size: 15px;
   color: var(--muted);
 }
 
@@ -315,7 +303,7 @@ ol {
   border: 0;
   padding: 0;
   font: inherit;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--accent);
   cursor: pointer;
 }
@@ -372,15 +360,28 @@ html[data-vt="pub"]::view-transition-group(*) {
    ============================================================ */
 
 @media (max-width: 560px) {
+  :root {
+    --pad-x: 20px;
+  }
+
   body {
     font-size: 16px;
   }
 
   .page {
-    padding: 44px 20px 72px;
+    padding: var(--s6) var(--pad-x) var(--s7);
   }
 
-  .roles li {
+  /* The gutter becomes a line of its own above each entry. */
+  .roles li,
+  .pubs li,
+  .repos li,
+  .terms li {
     grid-template-columns: 1fr;
+  }
+
+  /* There is no second column to skip to once the grid is one column wide. */
+  .repos li > * {
+    grid-column: auto;
   }
 }

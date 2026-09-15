@@ -78,19 +78,20 @@
         I work on quantum field theory and its less-tractable corners.
         Lately I'm bringing that same taste for hard problems and clean abstractions over to quantum information technology.
       </p>
+      <!-- One nbsp before each dot; the line break after it collapses to the
+           space on the other side, so the dot sits centred in its gap and can
+           never start a wrapped line. -->
       <p class="reach">
-        <a data-email="href" href="#">Email</a>&nbsp;·&nbsp;
-        <a data-matrix="href" href="#">Matrix</a>&nbsp;·&nbsp;
-        <a href="https://github.com/schenkse" rel="me noopener">GitHub</a>&nbsp;·&nbsp;
-        <a href="https://inspirehep.net/authors/1706735" rel="me noopener">INSPIRE-HEP</a>&nbsp;·&nbsp;
+        <a data-email="href" href="#">Email</a>&nbsp;·
+        <a data-matrix="href" href="#">Matrix</a>&nbsp;·
+        <a href="https://github.com/schenkse" rel="me noopener">GitHub</a>&nbsp;·
+        <a href="https://inspirehep.net/authors/1706735" rel="me noopener">INSPIRE-HEP</a>&nbsp;·
         <a href="https://orcid.org/0000-0002-9143-8870" rel="me noopener">ORCID</a>
       </p>
 
       <h2 id="about">About</h2>
       <p>
-        My research lives in some challenging corners of quantum theory.
-        This includes instantons and other nonperturbative effects, semiclassical descriptions, and quantum tunneling.
-        In short, the kinds of calculations that keep the path integral interesting.
+        Instantons and other nonperturbative effects, semiclassical descriptions, quantum tunneling — the kinds of calculations that keep the path integral interesting.
       </p>
       <p>
         Along the way, almost any topic in high energy physics can catch my attention, especially the problems where careful thinking pays off.
@@ -99,32 +100,32 @@
       </p>
       <ol class="roles">
         <li>
-          <span class="roles__when">2025 — now</span>
+          <span class="gutter">2025 — now</span>
           <span>Postdoctoral Researcher, <em>Karlsruhe Institute of Technology, DE</em></span>
         </li>
         <li>
-          <span class="roles__when">2022 — 2025</span>
+          <span class="gutter">2022 — 2025</span>
           <span>Postdoctoral Researcher, <em>Mainz University, DE</em></span>
         </li>
         <li>
-          <span class="roles__when">2019 — 2022</span>
+          <span class="gutter">2019 — 2022</span>
           <span>Postdoctoral Researcher and Walter Benjamin Fellow, <em>Durham University, UK</em></span>
         </li>
         <li>
-          <span class="roles__when">2016 — 2019</span>
+          <span class="gutter">2016 — 2019</span>
           <span>PhD, Theoretical Physics, <em>Heidelberg University, DE</em></span>
         </li>
       </ol>
 
       <h2 id="publications">Publications</h2>
-      <p class="filters" data-pub-filters>
-        Showing
-        <button class="filter" type="button" data-filter="recent" aria-pressed="true">recent</button>
-        <button class="filter" type="button" data-filter="all" aria-pressed="false">all</button>
-      </p>
       <ol class="pubs" data-pub-list>
         <li class="empty-state">Loading publications…</li>
       </ol>
+      <p class="pub-more">
+        <button class="filter" type="button" data-pub-toggle aria-expanded="false">
+          Show all publications
+        </button>
+      </p>
 
       <h2 id="code">Code</h2>
       <ul class="repos" data-project-list>
@@ -137,7 +138,6 @@
       </ul>
 
       <footer class="foot">
-        <span>Updated September 2026</span>
         <!-- Both glyphs ship in the markup and CSS shows the one that matches the
              current theme, so the button is correct before main.js runs. -->
         <button
