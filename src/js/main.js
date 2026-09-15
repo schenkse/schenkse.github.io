@@ -433,7 +433,7 @@
     const applyFilter = () => {
       const all = mode === "all";
       renderPublications(all ? data : data.slice(0, 3), list);
-      toggle.textContent = all ? "Show fewer" : "Show all " + data.length + " publications";
+      toggle.textContent = all ? "Show fewer" : "Show all";
       toggle.setAttribute("aria-expanded", String(all));
     };
 
