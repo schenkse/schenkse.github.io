@@ -314,7 +314,7 @@
    * ---------------------------------------------------------- */
   /**
    * Render a list of publications into `list`, one entry per line: title,
-   * authors (with S. Schenk in bold), then a meta line of year, venue and links.
+   * authors, then a meta line of year, venue and links.
    * arxiv/doi accept bare IDs (expanded to canonical URLs) or full URLs; every
    * href is built via safeUrl(), which neutralizes javascript:/data:/vbscript:.
    * @param {object[]} items - Publications to render.
@@ -348,17 +348,7 @@
       const authorList = Array.isArray(p.authors)
         ? p.authors
         : String(p.authors || "").split(/,\s*/);
-      authorList.forEach((name, i) => {
-        if (i) authors.append(", ");
-        // Bold the site owner, the way a CV does.
-        if (/^S\.\s*Schenk$/i.test(name.trim())) {
-          const b = document.createElement("b");
-          b.textContent = name;
-          authors.appendChild(b);
-        } else {
-          authors.append(name);
-        }
-      });
+      authors.textContent = authorList.join(", ");
 
       const meta = document.createElement("span");
       meta.className = "pub__meta";
