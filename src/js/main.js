@@ -7,7 +7,7 @@
  *
  * Behaviors (each `init*` no-ops when its root markup is absent):
  *   theme toggle · interference plate · contact obfuscation ·
- *   publication filter · projects · interests.
+ *   publication filter · projects · interests · footer date.
  *
  * Boot order is defined at the bottom of the file. The async features
  * (publications, projects, interests) fetch their content from src/data/*.json.
@@ -551,6 +551,31 @@
   }
 
   /* ----------------------------------------------------------
+   *  Footer date
+   * ---------------------------------------------------------- */
+  /**
+   * Stamp the footer with the page's own Last-Modified date, read from
+   * document.lastModified. With no build step there is nothing to inject a
+   * date at deploy time, and a hand-written one silently goes false; this
+   * needs no fetch, no extra request and no maintenance, and it tracks the
+   * deploy, which is what "updated" means for a static page.
+   *
+   * Served over file:// there is no Last-Modified header and the browser
+   * substitutes the current time. That is left alone: guarding against it
+   * costs a real date whenever a visitor's clock runs ahead of the server's.
+   */
+  function initUpdated() {
+    const el = $("[data-updated]");
+    if (!el) return;
+
+    const when = new Date(document.lastModified);
+    if (Number.isNaN(when.getTime())) return;
+
+    el.textContent =
+      "Updated " + when.toLocaleDateString("en", { month: "long", year: "numeric" });
+  }
+
+  /* ----------------------------------------------------------
    *  Boot — run each feature once. Order is intentional but loose: the sync
    *  features run first, then the three async (JSON-fetching) ones kick off.
    *  Every init* no-ops when its root markup is missing.
@@ -561,4 +586,5 @@
   initPublications();
   initProjects();
   initInterests();
+  initUpdated();
 })();
