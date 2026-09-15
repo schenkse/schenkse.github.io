@@ -91,13 +91,6 @@ canvas {
   max-width: 100%;
 }
 
-/* The UA's [hidden] rule is display:none at the lowest precedence, so any
-   author display value beats it. The year row is a flex container, so without
-   this it would never hide. */
-[hidden] {
-  display: none !important;
-}
-
 a {
   color: var(--accent);
   text-decoration: none;
@@ -247,28 +240,6 @@ ol {
 }
 
 .filter[aria-pressed="true"] {
-  color: var(--text);
-  font-weight: 600;
-  text-decoration: none;
-  cursor: default;
-}
-
-.years {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin-bottom: 14px;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Year buttons reuse .filter for colour and hover, but the row spaces them
-   with a flex gap, so the inherited margin would double it. */
-.years .filter {
-  margin-right: 0;
-}
-
-.year[aria-pressed="true"] {
   color: var(--text);
   font-weight: 600;
   text-decoration: none;

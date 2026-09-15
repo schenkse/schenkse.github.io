@@ -391,17 +391,14 @@
    * Sorting: by year descending, ties broken by arXiv ID (YYMM.NNNNN) descending,
    * so "recent" is correct regardless of the JSON's order.
    *
-   * Filter modes (state.mode): "recent" (first 3, default), "all", "year" (one
-   * year from the inline year row, which "by year" expands). The active filter is
-   * mirrored in the URL query and read back on load: ?pub=all, ?pub=<year> (only
-   * if that year exists), else recent. writeUrl() uses history.replaceState and
-   * keeps the #publications hash.
+   * Filter modes: "recent" (first 3, default) and "all". The active filter is
+   * mirrored in the URL query and read back on load: ?pub=all, else recent.
+   * writeUrl() uses history.replaceState and keeps the #publications hash.
    */
   async function initPublications() {
     const list = $("[data-pub-list]");
     const filterRow = $("[data-pub-filters]");
-    const yearRow = $("[data-pub-years]");
-    if (!list || !filterRow || !yearRow) return;
+    if (!list || !filterRow) return;
 
     let data;
     try {
@@ -426,81 +423,28 @@
     data.sort((a, b) => b.year - a.year || arxivKey(b).localeCompare(arxivKey(a)));
 
     const filters = $$(".filter", filterRow);
-    const yearBtn = $('[data-filter="year"]', filterRow);
 
-    const years = Array.from(new Set(data.map((p) => p.year))).sort((a, b) => b - a);
-    years.forEach((y) => {
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "filter year";
-      btn.textContent = String(y);
-      btn.dataset.year = String(y);
-      btn.setAttribute("aria-pressed", "false");
-      li.appendChild(btn);
-      yearRow.appendChild(li);
-    });
-
-    const readUrl = () => {
-      const pub = new URLSearchParams(location.search).get("pub");
-      if (pub === "all") return { mode: "all", year: null };
-      if (pub && /^\d{4}$/.test(pub) && years.includes(Number(pub))) {
-        return { mode: "year", year: Number(pub) };
-      }
-      return { mode: "recent", year: null };
-    };
+    const readUrl = () =>
+      new URLSearchParams(location.search).get("pub") === "all" ? "all" : "recent";
 
     const writeUrl = () => {
-      const q =
-        state.mode === "all"
-          ? "?pub=all"
-          : state.mode === "year"
-          ? "?pub=" + state.year
-          : "";
+      const q = mode === "all" ? "?pub=all" : "";
       history.replaceState(null, "", location.pathname + q + "#publications");
     };
 
-    let state = readUrl();
+    let mode = readUrl();
 
     const applyFilter = () => {
-      let items = data;
-      if (state.mode === "recent") items = data.slice(0, 3);
-      else if (state.mode === "year" && state.year != null) {
-        items = data.filter((p) => p.year === state.year);
-      }
-      renderPublications(items, list);
-
+      renderPublications(mode === "all" ? data : data.slice(0, 3), list);
       filters.forEach((b) => {
-        b.setAttribute("aria-pressed", String(b.dataset.filter === state.mode));
-      });
-      // The year row stays open for as long as a year is the active filter.
-      const byYear = state.mode === "year";
-      if (byYear) yearRow.hidden = false;
-      yearBtn.setAttribute("aria-expanded", String(!yearRow.hidden));
-      $$(".year", yearRow).forEach((b) => {
-        b.setAttribute("aria-pressed", String(byYear && Number(b.dataset.year) === state.year));
+        b.setAttribute("aria-pressed", String(b.dataset.filter === mode));
       });
     };
 
     filterRow.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-filter]");
-      if (!btn) return;
-      if (btn.dataset.filter === "year") {
-        // "by year" only opens the row; picking a year is what filters.
-        yearRow.hidden = !yearRow.hidden;
-        yearBtn.setAttribute("aria-expanded", String(!yearRow.hidden));
-        return;
-      }
-      state = { mode: btn.dataset.filter, year: null };
-      yearRow.hidden = true;
-      writeUrl();
-      withViewTransition(applyFilter, "pub");
-    });
-
-    yearRow.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-year]");
-      if (!btn) return;
-      state = { mode: "year", year: Number(btn.dataset.year) };
+      if (!btn || btn.dataset.filter === mode) return;
+      mode = btn.dataset.filter;
       writeUrl();
       withViewTransition(applyFilter, "pub");
     });
