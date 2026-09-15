@@ -106,7 +106,8 @@
    * - The button's icon shows the theme it switches *to*; CSS does that swap off
    *   data-theme, so only aria-pressed and aria-label are set here.
    * - On click, flips data-theme and persists the choice to localStorage["theme"]
-   *   (try/catch guards private-mode failures).
+   *   (try/catch guards private-mode failures). The swap runs inside a view
+   *   transition, so the two palettes cross-fade instead of snapping.
    * - Follows OS prefers-color-scheme changes mid-session, but only while the user
    *   has made no explicit choice (nothing stored).
    * The first paint's theme is set by src/js/theme.js, not here.
@@ -122,35 +123,16 @@
     };
     sync();
 
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", () => {
       const cur = document.documentElement.getAttribute("data-theme");
       const next = cur === "dark" ? "light" : "dark";
-      const apply = () => {
+      withViewTransition(() => {
         document.documentElement.setAttribute("data-theme", next);
         try {
           localStorage.setItem("theme", next);
         } catch (_) {}
         sync();
-      };
-      const vt = withViewTransition(apply, "theme");
-      if (!vt) return;
-      // Sweep the new theme out as a circle from the click point; keyboard
-      // activation has no pointer coords, so fall back to the button's center.
-      const r = btn.getBoundingClientRect();
-      const x = e.clientX || r.left + r.width / 2;
-      const y = e.clientY || r.top + r.height / 2;
-      const end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-      vt.ready.then(() => {
-        document.documentElement.animate(
-          {
-            clipPath: [
-              "circle(0 at " + x + "px " + y + "px)",
-              "circle(" + end + "px at " + x + "px " + y + "px)",
-            ],
-          },
-          { duration: 450, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
-        );
-      });
+      }, "theme");
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -534,9 +516,9 @@
    *    url {string} (scheme-less values get https:// prefixed) · year {number}
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/projects.json and render it as a plain list, newest first.
-   * Only the first tag is shown — it's the project's primary language, and the
-   * full tag list would crowd the line without telling a reader much more.
+   * Load src/data/projects.json and render it as a plain list, newest first:
+   * the linked name, then the description. `tags` stays in the JSON but is not
+   * rendered — the language labels crowded the line without earning it.
    */
   async function initProjects() {
     const list = $("[data-project-list]");
@@ -570,8 +552,7 @@
       link.appendChild(name);
 
       const rest = document.createElement("span");
-      const lang = Array.isArray(p.tags) && p.tags.length ? p.tags[0] : "";
-      rest.textContent = " — " + p.description + (lang ? " (" + lang + ")" : "");
+      rest.textContent = " — " + p.description;
 
       li.append(link, rest);
       frag.appendChild(li);

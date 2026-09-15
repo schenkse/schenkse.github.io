@@ -127,12 +127,6 @@ a:hover {
   height: 100%;
 }
 
-.plate-caption {
-  margin: 0 0 30px;
-  font-size: 13.5px;
-  color: var(--muted);
-}
-
 /* ============================================================
    The column — everything else lives in one measure
    ============================================================ */
@@ -140,7 +134,9 @@ a:hover {
 .page {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 40px 28px 90px;
+  /* The top padding is the whole gap between the plate and the name; the
+     column starts on the h1, with nothing captioning the ornament. */
+  padding: 66px 28px 90px;
 }
 
 h1 {
@@ -384,19 +380,11 @@ html[data-theme="dark"] .theme-toggle__icon--moon {
    data-vt attribute on <html> scopes styling to one transition at a time.
    ============================================================ */
 
-/* Theme toggle — the new theme is clipped in over the old by a JS-driven circle
-   (see initThemeToggle), so suppress the default root cross-fade and stack the
-   new snapshot above the old. */
+/* Theme toggle — the UA's plain cross-fade between the two palettes, shortened
+   so the swap reads as a change of ink rather than an effect. */
 html[data-vt="theme"]::view-transition-old(root),
 html[data-vt="theme"]::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-html[data-vt="theme"]::view-transition-new(root) {
-  z-index: 1;
-}
-html[data-vt="theme"]::view-transition-old(root) {
-  z-index: 0;
+  animation-duration: 160ms;
 }
 
 /* Publications filter — a touch slower than the UA default cross-fade/morph. */
@@ -425,7 +413,7 @@ html[data-vt="pub"]::view-transition-group(*) {
   }
 
   .page {
-    padding: 32px 20px 72px;
+    padding: 44px 20px 72px;
   }
 
   .roles li {
