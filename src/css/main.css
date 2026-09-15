@@ -262,22 +262,12 @@ li.empty-state {
   font-size: 15px;
 }
 
-/* ============================================================
-   Code and interests
+/* Code — the only gutter holding a name rather than a category, so it carries
+   weight: it is the key, the thing you click, and the primary half of the line.
    ============================================================ */
 
-/* The only list with an empty gutter: a project's name is its own scan key, so
-   the column is kept for alignment and the single child skips to it. */
-.repos li > * {
-  grid-column: 2;
-}
-
-.repos b {
+.repos .gutter {
   font-weight: 600;
-}
-
-.repos a + span {
-  color: var(--muted);
 }
 
 /* ============================================================
@@ -378,10 +368,5 @@ html[data-vt="pub"]::view-transition-group(*) {
   .repos li,
   .terms li {
     grid-template-columns: 1fr;
-  }
-
-  /* There is no second column to skip to once the grid is one column wide. */
-  .repos li > * {
-    grid-column: auto;
   }
 }

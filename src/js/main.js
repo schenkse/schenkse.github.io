@@ -457,14 +457,13 @@
    *    url {string} (scheme-less values get https:// prefixed) · year {number}
    * ---------------------------------------------------------- */
   /**
-   * Load src/data/projects.json and render it newest first: the linked name,
-   * then the description.
+   * Load src/data/projects.json and render it newest first: the linked name in
+   * the shared left gutter, the description beside it.
    *
-   * This is the one list whose gutter stays empty. A project's name is its own
-   * scan key and already starts the line, and both candidate labels — the year
-   * and the language — only repeat what the line says. The column is kept so
-   * the names align with every other list; see .repos li in main.css.
-   * `year` sorts the list, and `tags` is not rendered at all.
+   * Here the gutter key is the project's own name rather than a category — it
+   * is what a reader scans this list by, so it takes the column that every
+   * other list gives to its key, and the entries need no " — " to separate the
+   * two halves. `year` sorts the list; `tags` is not rendered.
    */
   async function initProjects() {
     const list = $("[data-project-list]");
@@ -490,20 +489,18 @@
     data.forEach((p) => {
       const li = document.createElement("li");
 
+      const name = document.createElement("span");
+      name.className = "gutter";
       const link = document.createElement("a");
       link.href = safeUrl(p.url, "https://");
       link.rel = "noopener";
-      const name = document.createElement("b");
-      name.textContent = p.name;
-      link.appendChild(name);
+      link.textContent = p.name;
+      name.appendChild(link);
 
-      const rest = document.createElement("span");
-      rest.textContent = " — " + p.description;
+      const description = document.createElement("span");
+      description.textContent = p.description;
 
-      const body = document.createElement("span");
-      body.append(link, rest);
-
-      li.append(body);
+      li.append(name, description);
       frag.appendChild(li);
     });
     list.appendChild(frag);
