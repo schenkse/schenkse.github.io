@@ -31,8 +31,6 @@
   /* Typography — system stacks only; the page fetches no fonts. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
 
   /* Layout */
   --measure: 680px;           /* the single content column */

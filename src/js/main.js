@@ -1,8 +1,9 @@
 /**
  * Personal portfolio — single JS file, no dependencies, no build step.
  *
- * Loaded with `defer` from index.html, so it runs after the HTML is parsed.
- * Everything is wrapped in an IIFE in strict mode; nothing leaks to global scope.
+ * Loaded with `defer` from index.html and 404.html, so it runs after the HTML
+ * is parsed. Everything is wrapped in an IIFE in strict mode; nothing leaks to
+ * global scope.
  *
  * Behaviors (each `init*` no-ops when its root markup is absent):
  *   theme toggle · interference plate · contact obfuscation ·
