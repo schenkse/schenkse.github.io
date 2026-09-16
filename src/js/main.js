@@ -195,8 +195,13 @@
     }
 
     const frag = document.createDocumentFragment();
-    items.forEach((p) => {
+    items.forEach((p, idx) => {
       const li = document.createElement("li");
+      // Stable, unique custom-ident so a paper shown by both filters morphs to its
+      // new position across a view transition instead of cross-fading. arXiv ids are
+      // unique; fall back to DOI, then the list index.
+      li.style.viewTransitionName =
+        "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
 
       const year = document.createElement("span");
       year.className = "gutter";
@@ -279,7 +284,16 @@
     toggle.addEventListener("click", () => {
       mode = mode === "all" ? "recent" : "all";
       writeUrl();
-      applyFilter();
+      if (reducedMotion.matches || !document.startViewTransition) {
+        applyFilter();
+        return;
+      }
+      // Marks the transition so the CSS can pace it apart from the theme swap.
+      const root = document.documentElement;
+      root.dataset.vt = "pub";
+      document.startViewTransition(applyFilter).finished.finally(() => {
+        delete root.dataset.vt;
+      });
     });
 
     applyFilter();

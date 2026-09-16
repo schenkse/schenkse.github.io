@@ -256,6 +256,14 @@ html[data-theme="dark"] .theme-toggle__icon--moon {
   animation-duration: 160ms;
 }
 
+/* The filter morphs entries between views, which needs longer than the theme
+   swap; the page beneath them fades at the same pace. */
+html[data-vt="pub"]::view-transition-group(*),
+html[data-vt="pub"]::view-transition-old(root),
+html[data-vt="pub"]::view-transition-new(root) {
+  animation-duration: 280ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
