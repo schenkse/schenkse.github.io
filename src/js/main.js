@@ -4,8 +4,6 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
   const loadJSON = async (path) => {
     const res = await fetch(path);
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -184,14 +182,12 @@
     const matrixServer = "matrix.org";
     const matrixHandle = "@" + matrixUser + ":" + matrixServer;
 
-    $$("[data-email]").forEach((el) => {
-      if (el.dataset.email !== "href") el.textContent = email;
+    document.querySelectorAll("[data-email]").forEach((el) => {
       el.setAttribute("href", "mailto:" + email);
       el.setAttribute("rel", "me noopener");
     });
 
-    $$("[data-matrix]").forEach((el) => {
-      if (el.dataset.matrix !== "href") el.textContent = matrixHandle;
+    document.querySelectorAll("[data-matrix]").forEach((el) => {
       el.setAttribute("href", "https://matrix.to/#/" + encodeURIComponent(matrixHandle));
       el.setAttribute("rel", "me noopener");
     });
