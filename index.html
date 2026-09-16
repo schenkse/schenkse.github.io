@@ -3,14 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Defense-in-depth. All scripts are same-origin files, so script-src is
-         'self' with no 'unsafe-inline' (the theme pre-paint lives in
-         src/js/theme.js; the JSON-LD block is data, not subject to script-src).
-         style-src keeps 'unsafe-inline' for the inline <style>/style attributes.
-         The strict default-src/object-src/base-uri/form-action block third-party
-         scripts, plugin embeds, <base> hijacking, and form exfiltration. Note:
-         clickjacking (frame-ancestors) needs an HTTP header GitHub Pages can't set.
-         font-src 'self' holds because the page uses no web fonts at all. -->
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
@@ -61,10 +53,6 @@
     <script src="src/js/main.js" defer></script>
   </head>
   <body>
-    <!-- The page's only ornament: a two-source interference pattern that
-         follows the pointer and settles. Decorative, so it stays out of the
-         accessibility tree; main.js renders a still frame under reduced
-         motion and leaves the canvas blank if there's no 2D context. -->
     <div class="band" data-field>
       <canvas class="band__plate" aria-hidden="true"></canvas>
     </div>
@@ -78,9 +66,7 @@
         I work on quantum field theory in its less-tractable corners.
         Lately I'm bringing that same taste for hard problems and clean abstractions over to quantum information technology.
       </p>
-      <!-- One nbsp before each dot; the line break after it collapses to the
-           space on the other side, so the dot sits centred in its gap and can
-           never start a wrapped line. -->
+
       <p class="reach">
         <a data-email="href" href="#">Email</a>&nbsp;·
         <a data-matrix="href" href="#">Matrix</a>&nbsp;·
@@ -137,16 +123,14 @@
 
       <footer class="foot">
         <span data-updated></span>
-        <!-- Both glyphs ship in the markup and CSS shows the one that matches the
-             current theme, so the button is correct before main.js runs. -->
         <button
           class="theme-toggle"
           type="button"
           aria-pressed="false"
           aria-label="Switch to dark theme"
         >
-          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
-          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>
+          <svg class="theme-toggle__icon--moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
+          <svg class="theme-toggle__icon--sun" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>
         </button>
       </footer>
     </main>

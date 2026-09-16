@@ -13,17 +13,13 @@
     <meta name="theme-color" content="#131314" media="(prefers-color-scheme: dark)" />
     <meta name="robots" content="noindex" />
 
-    <!-- Every path here is root-absolute: GitHub Pages serves this file for any
-         missing address, so a relative path would resolve against /a/b/. -->
+    <!-- Root paths keep assets working at nested missing URLs. -->
     <link rel="icon" type="image/svg+xml" href="/src/assets/favicon.svg" />
     <link rel="stylesheet" href="/src/css/main.css" />
     <script src="/src/js/theme.js"></script>
     <script src="/src/js/main.js" defer></script>
   </head>
   <body>
-    <!-- The site's only ornament: a two-source interference pattern that follows
-         the pointer and settles. Decorative, so it stays out of the
-         accessibility tree. -->
     <div class="band" data-field>
       <canvas class="band__plate" aria-hidden="true"></canvas>
     </div>
@@ -34,16 +30,14 @@
       <p>Back to the <a href="/">home page</a>.</p>
 
       <footer class="foot">
-        <!-- Both glyphs ship in the markup and CSS shows the one that matches the
-             current theme, so the button is correct before main.js runs. -->
         <button
           class="theme-toggle"
           type="button"
           aria-pressed="false"
           aria-label="Switch to dark theme"
         >
-          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
-          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>
+          <svg class="theme-toggle__icon--moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>
+          <svg class="theme-toggle__icon--sun" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M4.9 19.1l1.9-1.9M17.2 6.8l1.9-1.9"/></g></svg>
         </button>
       </footer>
     </main>

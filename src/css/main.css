@@ -1,42 +1,16 @@
-/* ============================================================
-   Personal portfolio styles — single stylesheet, no build step,
-   no framework, no web fonts.
-
-   The design is deliberately plain: one column, system type, two
-   colours and a link blue. The only ornament is the interference
-   plate at the top of the page (.band), which is why everything
-   below it stays quiet. Resist adding cards, shadows, gradients
-   or section chrome — the restraint is the design.
-
-   Theming is driven entirely by the custom properties below. The
-   :root block is the light theme (and the default); html[data-theme="dark"]
-   overrides only the colors. The active theme is set on <html> before
-   first paint by src/js/theme.js. To restyle the site, change these
-   tokens rather than hard-coding values in individual rules.
-   ============================================================ */
-
-/* ============================================================
-   Design tokens — the site's theming API. Color tokens are
-   re-declared per theme; everything else is theme-agnostic.
-   ============================================================ */
-
 :root {
-  /* Color */
-  --bg: #fdfdfc;              /* page background */
-  --text: #1a1a19;            /* primary body text */
-  --muted: #6a6a66;           /* secondary text — meta lines, dates, captions */
-  --border: #e3e3de;          /* hairline rules above headings and in the footer */
-  --accent: #0b5fbd;          /* links, and the bright ink in the plate */
+  --bg: #fdfdfc;
+  --text: #1a1a19;
+  --muted: #6a6a66;
+  --border: #e3e3de;
+  --accent: #0b5fbd;
 
-  /* Typography — system stacks only; the page fetches no fonts. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  /* Layout */
-  --measure: 680px;           /* the single content column */
-  --pad-x: 28px;              /* the column's side padding — not vertical rhythm */
+  --measure: 680px;
+  --pad-x: 28px;
 
-  /* Vertical rhythm — every margin and padding down the page is one of these. */
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -47,7 +21,6 @@
   --s8: 80px;
 }
 
-/* Dark theme — overrides the color tokens only. */
 html[data-theme="dark"] {
   --bg: #131314;
   --text: #e6e6e3;
@@ -55,10 +28,6 @@ html[data-theme="dark"] {
   --border: #2b2b2c;
   --accent: #7fb0f5;
 }
-
-/* ============================================================
-   Reset-ish
-   ============================================================ */
 
 *,
 *::before,
@@ -115,10 +84,6 @@ a:hover {
   border-radius: 2px;
 }
 
-/* ============================================================
-   The plate — full-bleed interference pattern, drawn by main.js
-   ============================================================ */
-
 .band {
   height: clamp(150px, 26vw, 232px);
   border-bottom: 1px solid var(--border);
@@ -129,15 +94,9 @@ a:hover {
   height: 100%;
 }
 
-/* ============================================================
-   The column — everything else lives in one measure
-   ============================================================ */
-
 .page {
   max-width: var(--measure);
   margin: 0 auto;
-  /* The top padding is the whole gap between the plate and the name; the
-     column starts on the h1, with nothing captioning the ornament. */
   padding: var(--s7) var(--pad-x) var(--s8);
 }
 
@@ -159,17 +118,12 @@ p {
   margin: 0 0 var(--s4);
 }
 
-/* Contact sits here rather than in a section of its own: the links are
-   short enough to carry inline, so they run as one muted sentence separated
-   by middle dots, and the page then needs no footer CTA. */
 .reach {
   margin: 0 0 var(--s5);
   font-size: 15px;
   color: var(--muted);
 }
 
-/* A hairline above each heading is the page's only structural device; the
-   heading itself is body size, set apart by weight rather than by shrinking. */
 h2 {
   font-size: inherit;
   font-weight: 700;
@@ -185,14 +139,6 @@ ol {
   padding-left: 0;
   list-style: none;
 }
-
-/* ============================================================
-   Lists — one grammar for all four
-
-   Every list on the page is a label in the left gutter and its content on
-   the right, so they all share one grid and the content of the whole page
-   starts at the same x. The label is a year or a one-word category.
-   ============================================================ */
 
 .roles li,
 .pubs li,
@@ -210,7 +156,6 @@ ol {
   font-variant-numeric: tabular-nums;
 }
 
-/* Loading and error rows have no gutter label, so they ignore the grid. */
 li.empty-state {
   display: block;
   color: var(--muted);
@@ -222,15 +167,10 @@ li.empty-state {
   color: var(--muted);
 }
 
-/* ============================================================
-   Publications
-   ============================================================ */
-
 .pub-more {
   font-size: 15px;
 }
 
-/* The one control on the page reads as a sentence, so it is set as a link. */
 .filter {
   font: inherit;
   background: none;
@@ -244,7 +184,6 @@ li.empty-state {
   text-decoration: underline;
 }
 
-/* Three lines per entry, so they need more air than the other lists. */
 .pubs li {
   padding: var(--s3) 0;
   line-height: 1.5;
@@ -262,17 +201,9 @@ li.empty-state {
   font-size: 15px;
 }
 
-/* Code — the only gutter holding a name rather than a category, so it carries
-   weight: it is the key, the thing you click, and the primary half of the line.
-   ============================================================ */
-
 .repos .gutter {
   font-weight: 600;
 }
-
-/* ============================================================
-   Footer
-   ============================================================ */
 
 .foot {
   margin-top: var(--s6);
@@ -302,8 +233,6 @@ li.empty-state {
   color: var(--text);
 }
 
-/* Both glyphs are in the markup; the theme attribute picks the one that shows
-   what a click switches *to*, so no script has to swap icons. */
 .theme-toggle__icon--sun {
   display: none;
 }
@@ -316,27 +245,15 @@ html[data-theme="dark"] .theme-toggle__icon--moon {
   display: none;
 }
 
-/* ============================================================
-   View transitions
-   Same-document transitions driven from main.js (withViewTransition). The
-   data-vt attribute on <html> scopes styling to one transition at a time.
-   ============================================================ */
-
-/* Theme toggle — the UA's plain cross-fade between the two palettes, shortened
-   so the swap reads as a change of ink rather than an effect. */
 html[data-vt="theme"]::view-transition-old(root),
 html[data-vt="theme"]::view-transition-new(root) {
   animation-duration: 160ms;
 }
 
-/* Publications filter — a touch slower than the UA default cross-fade/morph. */
 html[data-vt="pub"]::view-transition-group(*) {
   animation-duration: 280ms;
 }
 
-/* The global reduced-motion rule targets *, ::before and ::after — it does NOT
-   match ::view-transition-* pseudo-elements, so disable them explicitly too.
-   (JS already skips startViewTransition under reduced motion; this is a net.) */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -344,10 +261,6 @@ html[data-vt="pub"]::view-transition-group(*) {
     animation: none !important;
   }
 }
-
-/* ============================================================
-   Mobile
-   ============================================================ */
 
 @media (max-width: 560px) {
   :root {
@@ -362,7 +275,6 @@ html[data-vt="pub"]::view-transition-group(*) {
     padding: var(--s6) var(--pad-x) var(--s7);
   }
 
-  /* The gutter becomes a line of its own above each entry. */
   .roles li,
   .pubs li,
   .repos li,

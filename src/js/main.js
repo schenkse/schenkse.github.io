@@ -1,58 +1,16 @@
-/**
- * Personal portfolio — single JS file, no dependencies, no build step.
- *
- * Loaded with `defer` from index.html and 404.html, so it runs after the HTML
- * is parsed. Everything is wrapped in an IIFE in strict mode; nothing leaks to
- * global scope.
- *
- * Behaviors (each `init*` no-ops when its root markup is absent):
- *   theme toggle · interference plate · contact obfuscation ·
- *   publication filter · projects · interests · footer date.
- *
- * Boot order is defined at the bottom of the file. The async features
- * (publications, projects, interests) fetch their content from src/data/*.json.
- *
- * Conventions for editing:
- *   - Stay vanilla: no dependencies, no framework, must run as-is in the browser.
- *   - Progressive enhancement: guard new browser APIs and honor reduced-motion.
- *   - Keep ARIA state (aria-pressed / aria-expanded) in sync with visual state.
- *   - Build all JSON-derived hrefs via safeUrl() so unsafe schemes are neutralized.
- *   - Build JSON-derived text with textContent, never innerHTML.
- *   - The initial theme is set by src/js/theme.js (pre-paint); this file only
- *     handles the toggle and live OS-change following.
- */
 (function () {
   "use strict";
 
-  /** querySelector shorthand; returns the first match or null. */
   const $ = (sel, root = document) => root.querySelector(sel);
-  /** querySelectorAll shorthand; returns a real Array (so .map/.filter work). */
+
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  /**
-   * Fetch + parse a same-origin JSON file. Throws on a non-OK HTTP status;
-   * callers render their own error UI. Must stay same-origin (the CSP in
-   * index.html only allows same-origin connect-src). No cache-busting query:
-   * GitHub Pages' short max-age means edited data reaches returning visitors
-   * within minutes, so the browser cache can be used as-is.
-   * @param {string} path - Same-origin path to a JSON file.
-   * @returns {Promise<any>} Parsed JSON.
-   */
   const loadJSON = async (path) => {
     const res = await fetch(path);
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   };
 
-  /**
-   * Build a safe href from JSON-derived data. Returns "#" for empty values or
-   * dangerous schemes (javascript:/data:/vbscript:); passes absolute http(s) URLs
-   * through unchanged; otherwise prefixes `base` — an arXiv/DOI base or "https://"
-   * for scheme-less project URLs, or "" to keep a relative PDF path.
-   * @param {string} value - Raw value from a data file.
-   * @param {string} [base] - Prefix applied to bare/relative values.
-   * @returns {string} A safe href.
-   */
   const safeUrl = (value, base = "") => {
     const v = String(value || "").trim();
     if (!v) return "#";
@@ -61,12 +19,6 @@
     return base + v;
   };
 
-  /**
-   * Build an external link with a pre-vetted href.
-   * @param {string} href - Pre-validated URL.
-   * @param {string} label - Visible link text (e.g. "arXiv", "DOI", "PDF").
-   * @returns {HTMLAnchorElement}
-   */
   const makeLink = (href, label) => {
     const a = document.createElement("a");
     a.href = href;
@@ -75,17 +27,6 @@
     return a;
   };
 
-  /**
-   * Run a DOM update inside a same-document view transition when the API is
-   * available and motion is allowed; otherwise apply it synchronously.
-   * While the transition runs, `data-vt=<type>` is set on <html> so CSS can scope
-   * per-transition styling (see the "View transitions" section in main.css).
-   * Reads prefers-reduced-motion live (not a load-time snapshot) so a mid-session
-   * OS change is honored.
-   * @param {() => void} update - Mutates the DOM.
-   * @param {string} [type] - Optional transition label, mirrored to <html data-vt>.
-   * @returns {ViewTransition|null} The transition, or null when applied directly.
-   */
   function withViewTransition(update, type) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || typeof document.startViewTransition !== "function") {
@@ -99,20 +40,6 @@
     return vt;
   }
 
-  /* ----------------------------------------------------------
-   *  Theme toggle
-   * ---------------------------------------------------------- */
-  /**
-   * Wire up the dark/light toggle in the footer.
-   * - The button's icon shows the theme it switches *to*; CSS does that swap off
-   *   data-theme, so only aria-pressed and aria-label are set here.
-   * - On click, flips data-theme and persists the choice to localStorage["theme"]
-   *   (try/catch guards private-mode failures). The swap runs inside a view
-   *   transition, so the two palettes cross-fade instead of snapping.
-   * - Follows OS prefers-color-scheme changes mid-session, but only while the user
-   *   has made no explicit choice (nothing stored).
-   * The first paint's theme is set by src/js/theme.js, not here.
-   */
   function initThemeToggle() {
     const btn = $(".theme-toggle");
     if (!btn) return;
@@ -149,20 +76,6 @@
     });
   }
 
-  /* ----------------------------------------------------------
-   *  Interference plate
-   * ---------------------------------------------------------- */
-  /**
-   * Draw the page's one ornament: two coherent point sources interfering on a
-   * lattice of cells. Cell brightness is the squared sum of the two amplitudes,
-   * and the sign of that sum picks which of the page's two inks it is drawn in.
-   *
-   * The pattern answers the pointer rather than running on a clock. Moving the
-   * cursor across the plate sets a target position for the sources; they ease
-   * toward it, the lattice re-renders while they travel, and the loop stops as
-   * soon as they arrive — so an idle page costs nothing and sits on a still
-   * frame, which is also what a screenshot and a reduced-motion visitor get.
-   */
   function initField() {
     const band = $("[data-field]");
     const cv = band && $("canvas", band);
@@ -267,17 +180,6 @@
     });
   }
 
-  /* ----------------------------------------------------------
-   *  Contact
-   * ---------------------------------------------------------- */
-  /**
-   * Assemble the email and Matrix handle at runtime from split string parts so
-   * simple scrapers can't lift them from the static HTML.
-   * - [data-email] gets a mailto: href + rel="me noopener"; its text is set to the
-   *   address unless data-email="href" (link-only, keeps existing label).
-   * - [data-matrix] gets a https://matrix.to/#/... href (handle URL-encoded), with
-   *   the same data-matrix="href" opt-out for the text.
-   */
   function initContact() {
     // Email parts (split to avoid simple scraper regex).
     const emailUser = "hello";
@@ -301,26 +203,6 @@
     });
   }
 
-  /* ----------------------------------------------------------
-   *  Publications
-   *
-   *  JSON: src/data/publications.json — array of objects with fields:
-   *    year    {number}            required; drives sorting/filtering
-   *    title   {string}
-   *    authors {string|string[]}   string is comma-separated
-   *    venue / journal {string}    either key works; venue wins if both present
-   *    arxiv   {string}            bare ID (2506.10188) or full URL
-   *    doi     {string}            bare DOI or full URL
-   *    pdf     {string}            URL or relative path; unsafe schemes neutralized
-   * ---------------------------------------------------------- */
-  /**
-   * Render a list of publications into `list`: the year in the shared left
-   * gutter, then title, authors and a meta line of venue and links.
-   * arxiv/doi accept bare IDs (expanded to canonical URLs) or full URLs; every
-   * href is built via safeUrl(), which neutralizes javascript:/data:/vbscript:.
-   * @param {object[]} items - Publications to render.
-   * @param {HTMLElement} list - The <ol> to fill.
-   */
   function renderPublications(items, list) {
     list.textContent = "";
     if (!items.length) {
@@ -382,17 +264,6 @@
     list.appendChild(frag);
   }
 
-  /**
-   * Load and wire up the publication list.
-   *
-   * Sorting: by year descending, ties broken by arXiv ID (YYMM.NNNNN) descending,
-   * so "recent" is correct regardless of the JSON's order.
-   *
-   * Views: "recent" (first 3, default) and "all", swapped by the single link
-   * below the list. The view is mirrored in the URL query and read back on
-   * load: ?pub=all, else recent. writeUrl() uses history.replaceState and keeps
-   * the #publications hash.
-   */
   async function initPublications() {
     const list = $("[data-pub-list]");
     const toggle = $("[data-pub-toggle]");
@@ -449,22 +320,6 @@
     applyFilter();
   }
 
-  /* ----------------------------------------------------------
-   *  Projects
-   *
-   *  JSON: src/data/projects.json — array of objects with fields:
-   *    name {string} · description {string} · tags {string[]} ·
-   *    url {string} (scheme-less values get https:// prefixed) · year {number}
-   * ---------------------------------------------------------- */
-  /**
-   * Load src/data/projects.json and render it newest first: the linked name in
-   * the shared left gutter, the description beside it.
-   *
-   * Here the gutter key is the project's own name rather than a category — it
-   * is what a reader scans this list by, so it takes the column that every
-   * other list gives to its key, and the entries need no " — " to separate the
-   * two halves. `year` sorts the list; `tags` is not rendered.
-   */
   async function initProjects() {
     const list = $("[data-project-list]");
     if (!list) return;
@@ -506,16 +361,6 @@
     list.appendChild(frag);
   }
 
-  /* ----------------------------------------------------------
-   *  Interests
-   *
-   *  JSON: src/data/skills.json — an object of { group: string[] }.
-   * ---------------------------------------------------------- */
-  /**
-   * Load src/data/skills.json and render one line per group: the group name in
-   * the shared left gutter, then its items as a comma-separated list. Empty
-   * groups are skipped.
-   */
   async function initInterests() {
     const list = $("[data-skills]");
     if (!list) return;
@@ -550,20 +395,6 @@
     list.appendChild(frag);
   }
 
-  /* ----------------------------------------------------------
-   *  Footer date
-   * ---------------------------------------------------------- */
-  /**
-   * Stamp the footer with the page's own Last-Modified date, read from
-   * document.lastModified. With no build step there is nothing to inject a
-   * date at deploy time, and a hand-written one silently goes false; this
-   * needs no fetch, no extra request and no maintenance, and it tracks the
-   * deploy, which is what "updated" means for a static page.
-   *
-   * Served over file:// there is no Last-Modified header and the browser
-   * substitutes the current time. That is left alone: guarding against it
-   * costs a real date whenever a visitor's clock runs ahead of the server's.
-   */
   function initUpdated() {
     const el = $("[data-updated]");
     if (!el) return;
@@ -575,11 +406,6 @@
       "Updated " + when.toLocaleDateString("en", { month: "long", year: "numeric" });
   }
 
-  /* ----------------------------------------------------------
-   *  Boot — run each feature once. Order is intentional but loose: the sync
-   *  features run first, then the three async (JSON-fetching) ones kick off.
-   *  Every init* no-ops when its root markup is missing.
-   * ---------------------------------------------------------- */
   initThemeToggle();
   initField();
   initContact();

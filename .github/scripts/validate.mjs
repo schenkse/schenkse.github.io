@@ -1,15 +1,5 @@
 #!/usr/bin/env node
-// CI validator for the static portfolio site. Pure Node built-ins — no deps,
-// nothing shipped to the page (.github/ is excluded from GitHub Pages).
-// Run by .github/workflows/ci.yml.
-//
-// Checks:
-//   1. Every JSON file in src/data/ parses.
-//   2. Data files match the shape src/js/main.js depends on.
-//   3. Every in-page anchor (href="#id") in the HTML resolves to an id.
-//   4. Every local asset referenced by index.html / 404.html exists on disk.
-//
-// Prints "✓ All checks passed" and exits 0, or lists each problem and exits 1.
+// Validate content, local assets, and in-page links using Node built-ins.
 
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -32,7 +22,6 @@ const readJSON = (rel) => {
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 
-// 1 + 2: data file shapes --------------------------------------------------
 const pubs = readJSON("src/data/publications.json");
 if (pubs !== null) {
   if (!Array.isArray(pubs)) fail("publications.json: expected an array");
@@ -75,7 +64,6 @@ if (skills !== null) {
     });
 }
 
-// 3 + 4: HTML anchors + local assets --------------------------------------
 const checkHtml = (rel) => {
   let html;
   try {
@@ -105,7 +93,6 @@ const checkHtml = (rel) => {
 checkHtml("index.html");
 checkHtml("404.html");
 
-// Report -------------------------------------------------------------------
 if (errors.length) {
   console.error(`✗ ${errors.length} problem(s):`);
   for (const e of errors) console.error("  - " + e);
