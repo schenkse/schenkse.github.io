@@ -43,12 +43,11 @@ In page order.
 * **Publication filter** — recent = first 3 items, or all, swapped by the one
   link below the list. The view is mirrored in the URL (`?pub=all`) and read
   back on load.
-* **Footer date** — read from `document.lastModified`, so it tracks the deploy
-  rather than being bumped by hand. No build step is needed and no request is
-  made. `404.html` has no date slot, so it renders nothing.
 
 ## Code conventions
 * Use industry-standard, best practices for naming functions.
+* Update the footer date in `index.html` manually when site content changes,
+  keeping the visible month/year and the `<time datetime>` value in sync.
 * Keep publications, projects, and interests in `src/data/*.json`. Run
   `node .github/scripts/validate.mjs` after editing data or HTML.
 * Data links must be full HTTPS URLs, checked by CI. Render text with

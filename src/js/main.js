@@ -357,22 +357,10 @@
     list.appendChild(frag);
   }
 
-  function initUpdated() {
-    const el = $("[data-updated]");
-    if (!el) return;
-
-    const when = new Date(document.lastModified);
-    if (Number.isNaN(when.getTime())) return;
-
-    el.textContent =
-      "Updated " + when.toLocaleDateString("en", { month: "long", year: "numeric" });
-  }
-
   initThemeToggle();
   initField();
   initContact();
   initPublications();
   initProjects();
   initInterests();
-  initUpdated();
 })();
