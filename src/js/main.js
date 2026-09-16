@@ -2,6 +2,7 @@
   "use strict";
 
   const $ = (sel, root = document) => root.querySelector(sel);
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -87,11 +88,10 @@
     const STEP = 13;       // lattice spacing, px
     const K = 0.052;       // wavenumber; sets the fringe spacing
     const REACH = 135;     // how far the pointer can drag a source, px
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let w = 1;
     let h = 1;
-    let running = false;
+    let frame = 0;
     let cur = [0, 0, 0, 0];  // [x1, y1, x2, y2], current
     let tgt = [0, 0, 0, 0];  // [x1, y1, x2, y2], eased toward
 
@@ -135,17 +135,17 @@
         far = Math.max(far, Math.abs(tgt[i] - cur[i]));
       }
       draw();
-      if (far > 0.4) requestAnimationFrame(tick);
-      else running = false;
+      frame = far > 0.4 ? requestAnimationFrame(tick) : 0;
     };
 
     const kick = () => {
-      if (running || still) return;
-      running = true;
-      requestAnimationFrame(tick);
+      if (frame || reducedMotion.matches) return;
+      frame = requestAnimationFrame(tick);
     };
 
     const reset = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
       resize();
       cur = home();
       tgt = home();
@@ -154,15 +154,15 @@
 
     reset();
     window.addEventListener("resize", reset);
+    reducedMotion.addEventListener("change", reset);
     // At rest there is no next frame to pick up new token values, so a theme
     // change has to repaint the plate explicitly.
     new MutationObserver(draw).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
-    if (still) return;
-
     band.addEventListener("pointermove", (e) => {
+      if (reducedMotion.matches) return;
       const r = cv.getBoundingClientRect();
       if (!r.width || !r.height) return;
       const nx = ((e.clientX - r.left) / r.width) * 2 - 1;

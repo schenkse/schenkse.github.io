@@ -37,7 +37,7 @@ In page order.
   palettes over a short view transition.
 * **Interference plate** — two coherent sources drawn on a lattice in the page's
   own two inks. Follows the pointer, eases to a stop, and renders nothing
-  further while idle; a still frame under `prefers-reduced-motion`.
+  further while idle; responds to live `prefers-reduced-motion` changes.
 * **Contact obfuscation** — email and Matrix addresses assembled at runtime to
   avoid crawler scraping
 * **Publication filter** — recent = first 3 items, or all, swapped by the one
