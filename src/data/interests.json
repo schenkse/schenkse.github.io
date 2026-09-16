@@ -1,13 +1,17 @@
 {
   "Research": [
-    "Quantum field theory",
-    "Nonperturbative methods",
-    "Resurgence",
-    "Light dark matter",
+    "Instantons and tunneling",
+    "Resurgence and semiclassics",
+    "Tensor networks",
     "Skyrmions in chiral magnets",
-    "Tensor networks"
+    "Light dark matter"
   ],
-  "Languages": ["Python", "Julia", "TypeScript", "Wolfram Language"],
-  "Libraries": ["NumPy", "SciPy", "JAX", "CUDA", "Qiskit", "ITensors"],
+  "Methods": [
+    "Asymptotic analysis and resummation",
+    "Numerical simulation",
+    "GPU computing",
+    "Automatic differentiation"
+  ],
+  "Tools": ["Julia", "Python with JAX", "ITensor", "Mathematica", "TypeScript"],
   "Learning": ["Agentic workflows for research", "Topological edge states"]
 }
