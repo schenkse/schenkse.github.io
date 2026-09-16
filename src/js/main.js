@@ -43,10 +43,10 @@
   function initThemeToggle() {
     const btn = $(".theme-toggle");
     if (!btn) return;
+    let chosen = false;
 
     const sync = () => {
       const dark = document.documentElement.getAttribute("data-theme") === "dark";
-      btn.setAttribute("aria-pressed", String(dark));
       btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
     };
     sync();
@@ -54,13 +54,15 @@
     btn.addEventListener("click", () => {
       const cur = document.documentElement.getAttribute("data-theme");
       const next = cur === "dark" ? "light" : "dark";
-      withViewTransition(() => {
+      const update = () => {
         document.documentElement.setAttribute("data-theme", next);
+        chosen = true;
         try {
           localStorage.setItem("theme", next);
         } catch (_) {}
         sync();
-      }, "theme");
+      };
+      withViewTransition(update, "theme");
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -70,7 +72,7 @@
       try {
         stored = localStorage.getItem("theme");
       } catch (_) {}
-      if (stored) return;
+      if (chosen || stored === "light" || stored === "dark") return;
       document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
       sync();
     });
