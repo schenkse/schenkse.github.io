@@ -245,13 +245,9 @@ html[data-theme="dark"] .theme-toggle__icon--moon {
   display: none;
 }
 
-html[data-vt="theme"]::view-transition-old(root),
-html[data-vt="theme"]::view-transition-new(root) {
+::view-transition-old(root),
+::view-transition-new(root) {
   animation-duration: 160ms;
-}
-
-html[data-vt="pub"]::view-transition-group(*) {
-  animation-duration: 280ms;
 }
 
 @media (prefers-reduced-motion: reduce) {

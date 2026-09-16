@@ -18,19 +18,6 @@
     return a;
   };
 
-  function withViewTransition(update, type) {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || typeof document.startViewTransition !== "function") {
-      update();
-      return null;
-    }
-    const root = document.documentElement;
-    if (type) root.dataset.vt = type;
-    const vt = document.startViewTransition(update);
-    if (type) vt.finished.finally(() => delete root.dataset.vt);
-    return vt;
-  }
-
   function initThemeToggle() {
     const btn = $(".theme-toggle");
     if (!btn) return;
@@ -53,7 +40,11 @@
         } catch (_) {}
         sync();
       };
-      withViewTransition(update, "theme");
+      if (!reducedMotion.matches && document.startViewTransition) {
+        document.startViewTransition(update);
+      } else {
+        update();
+      }
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -204,13 +195,8 @@
     }
 
     const frag = document.createDocumentFragment();
-    items.forEach((p, idx) => {
+    items.forEach((p) => {
       const li = document.createElement("li");
-      // Stable, unique custom-ident so a paper shown by two filters morphs to its
-      // new position across a view transition instead of cross-fading. arXiv ids are
-      // unique; fall back to DOI, then the list index.
-      li.style.viewTransitionName =
-        "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
 
       const year = document.createElement("span");
       year.className = "gutter";
@@ -258,8 +244,9 @@
       list.textContent = "";
       const li = document.createElement("li");
       li.className = "empty-state";
-      li.textContent =
-        "Publications couldn't load. If you opened this file directly, run a local server.";
+      li.append("Publications couldn't load. ", makeLink(
+        "https://inspirehep.net/authors/1706735", "View them on INSPIRE-HEP."
+      ));
       list.appendChild(li);
       return;
     }
@@ -292,13 +279,11 @@
     toggle.addEventListener("click", () => {
       mode = mode === "all" ? "recent" : "all";
       writeUrl();
-      withViewTransition(applyFilter, "pub");
+      applyFilter();
     });
 
-    // With three or fewer papers the list is never truncated, so nothing to open.
-    if (data.length <= 3) toggle.parentElement.hidden = true;
-
     applyFilter();
+    toggle.parentElement.hidden = data.length <= 3;
   }
 
   async function initProjects() {
