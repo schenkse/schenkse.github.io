@@ -2,35 +2,30 @@
   {
     "name": "peerreview",
     "description": "Visualize academic co-authorship networks for any researcher indexed on InspireHEP.",
-    "tags": ["TypeScript", "CSS", "HTML"],
     "url": "https://github.com/schenkse/peerreview",
     "year": 2026
   },
   {
     "name": "preprint-numbers",
     "description": "A small Flask web application that assigns sequential preprint IDs to academic papers.",
-    "tags": ["Python", "HTML", "Mako"],
     "url": "https://github.com/schenkse/preprint-numbers",
     "year": 2025
   },
   {
     "name": "Resurgence.jl",
     "description": "Resummation techniques for divergent asymptotic series, in pure Julia.",
-    "tags": ["Julia"],
     "url": "https://github.com/schenkse/Resurgence.jl",
     "year": 2026
   },
   {
     "name": "BenderWu.jl",
     "description": "A Julia package implementing the Bender-Wu method.",
-    "tags": ["Julia"],
     "url": "https://github.com/schenkse/BenderWu.jl",
     "year": 2026
   },
   {
     "name": "conway-gol",
     "description": "A simple implementation of Conway's Game of Life written in javascript.",
-    "tags": ["JavaScript", "CSS", "HTML"],
     "url": "https://github.com/schenkse/conway-gol",
     "year": 2025
   }

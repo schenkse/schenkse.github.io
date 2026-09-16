@@ -15,52 +15,67 @@ const readJSON = (rel) => {
     return JSON.parse(readText(rel));
   } catch (e) {
     fail(`${rel}: invalid JSON — ${e.message}`);
-    return null;
   }
 };
 
 const isStr = (v) => typeof v === "string" && v.trim().length > 0;
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+const isHttpsUrl = (v) => {
+  if (!isStr(v) || !v.startsWith("https://") || /[\u0000-\u0020\u007f]/.test(v)) return false;
+  try {
+    return new URL(v).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 const pubs = readJSON("src/data/publications.json");
-if (pubs !== null) {
+if (pubs !== undefined) {
   if (!Array.isArray(pubs)) fail("publications.json: expected an array");
   else
     pubs.forEach((p, i) => {
+      if (!isObject(p)) return fail(`publications[${i}]: expected an object`);
       if (!isNum(p.year))
         fail(`publications[${i}] (${p.title ?? "?"}): "year" must be a number`);
       if (!isStr(p.title))
         fail(`publications[${i}]: "title" must be a non-empty string`);
+      if (!isStr(p.authors))
+        fail(`publications[${i}]: "authors" must be a non-empty string`);
+      if (p.journal != null && !isStr(p.journal))
+        fail(`publications[${i}]: "journal" must be a non-empty string or null`);
+      for (const key of ["arxiv", "doi"]) {
+        if (p[key] != null && !isHttpsUrl(p[key]))
+          fail(`publications[${i}]: "${key}" must be a full HTTPS URL or null`);
+      }
     });
 }
 
 const projects = readJSON("src/data/projects.json");
-if (projects !== null) {
+if (projects !== undefined) {
   if (!Array.isArray(projects)) fail("projects.json: expected an array");
   else
     projects.forEach((p, i) => {
+      if (!isObject(p)) return fail(`projects[${i}]: expected an object`);
       if (!isStr(p.name))
         fail(`projects[${i}]: "name" must be a non-empty string`);
-      if (!isStr(p.url))
-        fail(`projects[${i}] (${p.name ?? "?"}): "url" must be a non-empty string`);
+      if (!isStr(p.description))
+        fail(`projects[${i}]: "description" must be a non-empty string`);
+      if (!isHttpsUrl(p.url))
+        fail(`projects[${i}] (${p.name ?? "?"}): "url" must be a full HTTPS URL`);
       if (!isNum(p.year))
         fail(`projects[${i}] (${p.name ?? "?"}): "year" must be a number`);
-      if (
-        p.tags !== undefined &&
-        (!Array.isArray(p.tags) || p.tags.some((t) => !isStr(t)))
-      )
-        fail(`projects[${i}] (${p.name ?? "?"}): "tags" must be an array of strings`);
     });
 }
 
 const skills = readJSON("src/data/skills.json");
-if (skills !== null) {
-  if (typeof skills !== "object" || Array.isArray(skills) || skills === null)
+if (skills !== undefined) {
+  if (!isObject(skills))
     fail("skills.json: expected an object of { label: string[] }");
   else
     Object.entries(skills).forEach(([label, items]) => {
-      if (!Array.isArray(items) || items.some((t) => !isStr(t)))
-        fail(`skills.json: group "${label}" must be an array of strings`);
+      if (!isStr(label) || !Array.isArray(items) || items.some((t) => !isStr(t)))
+        fail(`skills.json: expected a non-empty group name and an array of strings`);
     });
 }
 

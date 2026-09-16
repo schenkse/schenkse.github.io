@@ -49,4 +49,8 @@ In page order.
 
 ## Code conventions
 * Use industry-standard, best practices for naming functions.
+* Keep publications, projects, and interests in `src/data/*.json`. Run
+  `node .github/scripts/validate.mjs` after editing data or HTML.
+* Data links must be full HTTPS URLs, checked by CI. Render text with
+  `textContent`, and keep publication authors as a string and the venue in `journal`.
 * The `main` branch is protected. Always work in feature branches.

@@ -12,14 +12,6 @@
     return res.json();
   };
 
-  const safeUrl = (value, base = "") => {
-    const v = String(value || "").trim();
-    if (!v) return "#";
-    if (/^(?:javascript|data|vbscript):/i.test(v)) return "#";
-    if (/^https?:\/\//i.test(v)) return v;
-    return base + v;
-  };
-
   const makeLink = (href, label) => {
     const a = document.createElement("a");
     a.href = href;
@@ -210,7 +202,7 @@
     if (!items.length) {
       const li = document.createElement("li");
       li.className = "empty-state";
-      li.textContent = "No publications match this filter.";
+      li.textContent = "No publications yet.";
       list.appendChild(li);
       return;
     }
@@ -234,20 +226,12 @@
 
       const authors = document.createElement("span");
       authors.className = "pub__authors";
-      const authorList = Array.isArray(p.authors)
-        ? p.authors
-        : String(p.authors || "").split(/,\s*/);
-      authors.textContent = authorList.join(", ");
+      authors.textContent = p.authors;
 
-      // Several entries have no journal, so the parts are collected first and
-      // joined — appending a separator per part would leave a stray one.
       const parts = [];
-      const venueText = p.venue || p.journal;
-      if (venueText) parts.push(venueText);
-      if (p.arxiv) parts.push(makeLink(safeUrl(p.arxiv, "https://arxiv.org/abs/"), "arXiv"));
-      if (p.doi) parts.push(makeLink(safeUrl(p.doi, "https://doi.org/"), "DOI"));
-      // No base, so absolute http(s) URLs and relative in-repo PDF paths both pass.
-      if (p.pdf) parts.push(makeLink(safeUrl(p.pdf), "PDF"));
+      if (p.journal) parts.push(p.journal);
+      if (p.arxiv) parts.push(makeLink(p.arxiv, "arXiv"));
+      if (p.doi) parts.push(makeLink(p.doi, "DOI"));
 
       const meta = document.createElement("span");
       meta.className = "pub__meta";
@@ -256,7 +240,6 @@
         meta.append(part);
       });
 
-      // One wrapper, so the entry is two grid children like every other list.
       const body = document.createElement("div");
       body.append(title, authors, meta);
 
@@ -348,11 +331,7 @@
 
       const name = document.createElement("span");
       name.className = "gutter";
-      const link = document.createElement("a");
-      link.href = safeUrl(p.url, "https://");
-      link.rel = "noopener";
-      link.textContent = p.name;
-      name.appendChild(link);
+      name.appendChild(makeLink(p.url, p.name));
 
       const description = document.createElement("span");
       description.textContent = p.description;
@@ -383,7 +362,7 @@
     list.textContent = "";
     const frag = document.createDocumentFragment();
     Object.entries(data)
-      .filter(([, items]) => Array.isArray(items) && items.length)
+      .filter(([, items]) => items.length)
       .forEach(([label, items]) => {
         const li = document.createElement("li");
         const name = document.createElement("span");
