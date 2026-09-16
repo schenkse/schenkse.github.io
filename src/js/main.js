@@ -343,12 +343,12 @@
   }
 
   async function initInterests() {
-    const list = $("[data-skills]");
+    const list = $("[data-interests]");
     if (!list) return;
 
     let data;
     try {
-      data = await loadJSON("src/data/skills.json");
+      data = await loadJSON("src/data/interests.json");
     } catch (err) {
       console.error("Failed to load interests:", err);
       list.textContent = "";

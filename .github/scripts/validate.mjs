@@ -68,14 +68,14 @@ if (projects !== undefined) {
     });
 }
 
-const skills = readJSON("src/data/skills.json");
-if (skills !== undefined) {
-  if (!isObject(skills))
-    fail("skills.json: expected an object of { label: string[] }");
+const interests = readJSON("src/data/interests.json");
+if (interests !== undefined) {
+  if (!isObject(interests))
+    fail("interests.json: expected an object of { label: string[] }");
   else
-    Object.entries(skills).forEach(([label, items]) => {
+    Object.entries(interests).forEach(([label, items]) => {
       if (!isStr(label) || !Array.isArray(items) || items.some((t) => !isStr(t)))
-        fail(`skills.json: expected a non-empty group name and an array of strings`);
+        fail(`interests.json: expected a non-empty group name and an array of strings`);
     });
 }
 

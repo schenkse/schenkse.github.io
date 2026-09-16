@@ -4,9 +4,10 @@
     "Nonperturbative methods",
     "Resurgence",
     "Light dark matter",
-    "Skyrmions in chiral magnets"
+    "Skyrmions in chiral magnets",
+    "Tensor networks"
   ],
-  "Tools": ["Python", "Julia", "TypeScript", "Wolfram", "Tensor networks"],
-  "Computing": ["NumPy", "SciPy", "JAX", "Mathematica", "CUDA", "Qiskit", "ITensors"],
+  "Languages": ["Python", "Julia", "TypeScript", "Wolfram Language"],
+  "Libraries": ["NumPy", "SciPy", "JAX", "CUDA", "Qiskit", "ITensors"],
   "Learning": ["Agentic workflows for research", "Topological edge states"]
 }
