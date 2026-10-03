@@ -284,8 +284,11 @@
       new URLSearchParams(location.search).get("pub") === "all" ? "all" : "recent";
 
     const writeUrl = () => {
-      const q = mode === "all" ? "?pub=all" : "";
-      history.replaceState(null, "", location.pathname + q + "#publications");
+      const url = new URL(location.href);
+      if (mode === "all") url.searchParams.set("pub", "all");
+      else url.searchParams.delete("pub");
+      url.hash = "publications";
+      history.replaceState(null, "", url);
     };
 
     let mode = readUrl();
