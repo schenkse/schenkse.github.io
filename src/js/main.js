@@ -45,6 +45,10 @@
     const sync = () => {
       const dark = document.documentElement.getAttribute("data-theme") === "dark";
       btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+      const themeColor = $('meta[name="theme-color"]');
+      if (themeColor) {
+        themeColor.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+      }
     };
     sync();
 

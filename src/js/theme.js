@@ -9,4 +9,8 @@
     ? stored
     : prefersDark ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", theme);
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) {
+    themeColor.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  }
 })();
