@@ -3,6 +3,25 @@
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let viewTransition = null;
+
+  // Theme and publication changes share one transition, so their updates cannot overlap.
+  function changeView(update, type) {
+    if (viewTransition) return;
+    if (reducedMotion.matches || !document.startViewTransition) {
+      update();
+      return;
+    }
+
+    const root = document.documentElement;
+    if (type) root.dataset.vt = type;
+    viewTransition = document.startViewTransition(update);
+    const finish = () => {
+      viewTransition = null;
+      delete root.dataset.vt;
+    };
+    viewTransition.finished.then(finish, finish);
+  }
 
   const loadJSON = async (path) => {
     const res = await fetch(path);
@@ -30,21 +49,16 @@
     sync();
 
     btn.addEventListener("click", () => {
-      const cur = document.documentElement.getAttribute("data-theme");
-      const next = cur === "dark" ? "light" : "dark";
-      const update = () => {
+      changeView(() => {
+        const cur = document.documentElement.getAttribute("data-theme");
+        const next = cur === "dark" ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", next);
         chosen = true;
         try {
           localStorage.setItem("theme", next);
         } catch (_) {}
         sync();
-      };
-      if (!reducedMotion.matches && document.startViewTransition) {
-        document.startViewTransition(update);
-      } else {
-        update();
-      }
+      });
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -282,18 +296,11 @@
     };
 
     toggle.addEventListener("click", () => {
-      mode = mode === "all" ? "recent" : "all";
-      writeUrl();
-      if (reducedMotion.matches || !document.startViewTransition) {
+      changeView(() => {
+        mode = mode === "all" ? "recent" : "all";
+        writeUrl();
         applyFilter();
-        return;
-      }
-      // Marks the transition so the CSS can pace it apart from the theme swap.
-      const root = document.documentElement;
-      root.dataset.vt = "pub";
-      document.startViewTransition(applyFilter).finished.finally(() => {
-        delete root.dataset.vt;
-      });
+      }, "pub");
     });
 
     applyFilter();
