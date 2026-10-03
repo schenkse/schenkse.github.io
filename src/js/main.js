@@ -90,26 +90,41 @@
 
     let w = 1;
     let h = 1;
+    let dpr = 0;
+    let palette;
     let frame = 0;
+    let resizeFrame = 0;
+    let lastTime = 0;
     let cur = [0, 0, 0, 0];  // [x1, y1, x2, y2], current
     let tgt = [0, 0, 0, 0];  // [x1, y1, x2, y2], eased toward
 
     const home = () => [w * 0.34, h * 0.44, w * 0.68, h * 0.52];
 
+    const readPalette = () => {
+      const cs = getComputedStyle(cv);
+      palette = {
+        bright: cs.getPropertyValue("--accent").trim(),
+        dim: cs.getPropertyValue("--text").trim(),
+        bg: cs.getPropertyValue("--bg").trim(),
+      };
+    };
+
     const resize = () => {
-      w = Math.max(1, cv.offsetWidth);
-      h = Math.max(1, cv.offsetHeight);
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      cv.width = w * dpr;
-      cv.height = h * dpr;
+      const width = Math.max(1, cv.offsetWidth);
+      const height = Math.max(1, cv.offsetHeight);
+      const scale = Math.min(2, window.devicePixelRatio || 1);
+      if (w === width && h === height && dpr === scale) return false;
+      w = width;
+      h = height;
+      dpr = scale;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return true;
     };
 
     const draw = () => {
-      const cs = getComputedStyle(cv);
-      const bright = cs.getPropertyValue("--accent").trim();
-      const dim = cs.getPropertyValue("--text").trim();
-      ctx.fillStyle = cs.getPropertyValue("--bg").trim();
+      ctx.fillStyle = palette.bg;
       ctx.fillRect(0, 0, w, h);
       for (let y = STEP / 2; y < h; y += STEP) {
         for (let x = STEP / 2; x < w; x += STEP) {
@@ -120,17 +135,21 @@
           if (intensity < 0.02) continue;
           const size = Math.max(1, intensity * (STEP - 4));
           ctx.globalAlpha = 0.05 + intensity * 0.34;
-          ctx.fillStyle = amplitude > 0 ? bright : dim;
+          ctx.fillStyle = amplitude > 0 ? palette.bright : palette.dim;
           ctx.fillRect(x - size / 2, y - size / 2, size, size);
         }
       }
       ctx.globalAlpha = 1;
     };
 
-    const tick = () => {
+    const tick = (time) => {
+      // Keep the original 60 Hz easing, independent of the display's refresh rate.
+      const elapsed = Math.max(0, Math.min(64, time - lastTime));
+      const ease = 1 - Math.pow(0.91, elapsed / (1000 / 60));
+      lastTime = time;
       let far = 0;
       for (let i = 0; i < 4; i++) {
-        cur[i] += (tgt[i] - cur[i]) * 0.09;
+        cur[i] += (tgt[i] - cur[i]) * ease;
         far = Math.max(far, Math.abs(tgt[i] - cur[i]));
       }
       draw();
@@ -139,24 +158,35 @@
 
     const kick = () => {
       if (frame || reducedMotion.matches) return;
+      lastTime = performance.now();
       frame = requestAnimationFrame(tick);
     };
 
     const reset = () => {
       cancelAnimationFrame(frame);
       frame = 0;
-      resize();
       cur = home();
       tgt = home();
       draw();
     };
 
+    readPalette();
+    resize();
     reset();
-    window.addEventListener("resize", reset);
+    window.addEventListener("resize", () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        if (resize()) reset();
+      });
+    });
     reducedMotion.addEventListener("change", reset);
     // At rest there is no next frame to pick up new token values, so a theme
     // change has to repaint the plate explicitly.
-    new MutationObserver(draw).observe(document.documentElement, {
+    new MutationObserver(() => {
+      readPalette();
+      draw();
+    }).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
