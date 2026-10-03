@@ -12,5 +12,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Check JavaScript syntax
+        run: |
+          node --check src/js/main.js
+          node --check src/js/theme.js
       - name: Validate data files and link integrity
         run: node .github/scripts/validate.mjs
