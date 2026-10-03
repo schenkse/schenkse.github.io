@@ -168,6 +168,27 @@ li.empty-state {
   font-size: 15px;
 }
 
+.loading-message {
+  display: none;
+}
+
+html[data-theme] .loading-message {
+  display: inline;
+}
+
+/* Approximate the initial lists while JSON loads; loaded and failed lists size naturally. */
+html[data-theme] .pubs[data-loading] {
+  min-height: 24em;
+}
+
+html[data-theme] .repos[data-loading] {
+  min-height: 20em;
+}
+
+html[data-theme] .interests[data-loading] {
+  min-height: 14em;
+}
+
 .roles em {
   font-style: normal;
   color: var(--muted);
@@ -224,7 +245,7 @@ li.empty-state {
 
 .theme-toggle {
   margin-left: auto;
-  display: inline-flex;
+  display: none;
   align-items: center;
   background: none;
   border: 0;
@@ -233,6 +254,10 @@ li.empty-state {
   font-size: 15px;
   color: var(--accent);
   cursor: pointer;
+}
+
+html[data-theme] .theme-toggle {
+  display: inline-flex;
 }
 
 .theme-toggle:hover {
@@ -290,5 +315,17 @@ html[data-vt="pub"]::view-transition-new(root) {
   .repos li,
   .interests li {
     grid-template-columns: 1fr;
+  }
+
+  html[data-theme] .pubs[data-loading] {
+    min-height: 33em;
+  }
+
+  html[data-theme] .repos[data-loading] {
+    min-height: 32em;
+  }
+
+  html[data-theme] .interests[data-loading] {
+    min-height: 29em;
   }
 }

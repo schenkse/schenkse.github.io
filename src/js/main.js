@@ -268,6 +268,8 @@
       ));
       list.appendChild(li);
       return;
+    } finally {
+      list.removeAttribute("data-loading");
     }
 
     // arXiv IDs (YYMM.NNNNN) break ties within a year by recency, so "recent"
@@ -322,6 +324,8 @@
       li.textContent = "Projects couldn't load.";
       list.appendChild(li);
       return;
+    } finally {
+      list.removeAttribute("data-loading");
     }
 
     data.sort((a, b) => b.year - a.year || String(a.name).localeCompare(String(b.name)));
@@ -359,6 +363,8 @@
       li.textContent = "Interests couldn't load.";
       list.appendChild(li);
       return;
+    } finally {
+      list.removeAttribute("data-loading");
     }
 
     list.textContent = "";
