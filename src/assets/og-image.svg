@@ -2,7 +2,7 @@
      role="img" aria-label="Sebastian Schenk — theoretical physicist">
   <!-- Share card, in the page's own palette and layout: the interference plate
        across the top over a hairline, then the name in the measure below. The
-       plate cells are the output of the same formula as initField() in
+       plate cells are the output of the same formula as initInterferencePlate() in
        src/js/main.js (STEP 13, K 0.052, sources at rest). Edit the text and
        colours here by hand; regenerate the lattice only if the plate changes. -->
   <rect width="1200" height="630" fill="#fdfdfc"/>
