@@ -16,5 +16,8 @@ jobs:
         run: |
           node --check src/js/main.js
           node --check src/js/theme.js
+          node --check .github/scripts/build.mjs
       - name: Validate data files and link integrity
         run: node .github/scripts/validate.mjs
+      - name: Build site
+        run: node .github/scripts/build.mjs

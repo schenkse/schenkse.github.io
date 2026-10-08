@@ -80,8 +80,7 @@ a:hover {
   text-decoration: underline;
 }
 
-p:not(.reach) a,
-.empty-state a {
+p:not(.reach) a {
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
@@ -164,53 +163,30 @@ ol {
   font-variant-numeric: tabular-nums;
 }
 
-li.empty-state {
-  display: block;
-  color: var(--muted);
-  font-size: 15px;
-}
-
-.loading-message {
-  display: none;
-}
-
-html[data-theme] .loading-message {
-  display: inline;
-}
-
-/* Approximate the initial lists while JSON loads; loaded and failed lists size naturally. */
-html[data-theme] .pubs[data-loading] {
-  min-height: 24em;
-}
-
-html[data-theme] .repos[data-loading] {
-  min-height: 20em;
-}
-
-html[data-theme] .interests[data-loading] {
-  min-height: 14em;
-}
-
 .roles em {
   font-style: normal;
   color: var(--muted);
 }
 
-.pub-more {
+.pub-more summary {
+  width: fit-content;
   font-size: 15px;
-}
-
-.filter {
-  font: inherit;
-  background: none;
-  border: 0;
-  padding: 0;
   color: var(--accent);
   cursor: pointer;
+  list-style: none;
 }
 
-.filter:hover {
+.pub-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.pub-more summary:hover {
   text-decoration: underline;
+}
+
+.pub-more[open] .when-closed,
+.pub-more:not([open]) .when-open {
+  display: none;
 }
 
 .pubs li {
@@ -287,14 +263,6 @@ html[data-theme="dark"] .theme-toggle__icon--moon {
   animation-duration: 160ms;
 }
 
-/* The filter morphs entries between views, which needs longer than the theme
-   swap; the page beneath them fades at the same pace. */
-html[data-vt="pub"]::view-transition-group(*),
-html[data-vt="pub"]::view-transition-old(root),
-html[data-vt="pub"]::view-transition-new(root) {
-  animation-duration: 280ms;
-}
-
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
@@ -321,17 +289,5 @@ html[data-vt="pub"]::view-transition-new(root) {
   .repos li,
   .interests li {
     grid-template-columns: 1fr;
-  }
-
-  html[data-theme] .pubs[data-loading] {
-    min-height: 33em;
-  }
-
-  html[data-theme] .repos[data-loading] {
-    min-height: 32em;
-  }
-
-  html[data-theme] .interests[data-loading] {
-    min-height: 29em;
   }
 }

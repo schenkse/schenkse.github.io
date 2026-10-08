@@ -3,39 +3,6 @@
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let viewTransition = null;
-
-  // Theme and publication changes share one transition, so their updates cannot overlap.
-  function changeView(update, type) {
-    if (viewTransition) return;
-    if (reducedMotion.matches || !document.startViewTransition) {
-      update();
-      return;
-    }
-
-    const root = document.documentElement;
-    if (type) root.dataset.vt = type;
-    viewTransition = document.startViewTransition(update);
-    const finish = () => {
-      viewTransition = null;
-      delete root.dataset.vt;
-    };
-    viewTransition.finished.then(finish, finish);
-  }
-
-  const loadJSON = async (path) => {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
-  };
-
-  const makeLink = (href, label) => {
-    const a = document.createElement("a");
-    a.href = href;
-    a.rel = "noopener";
-    a.textContent = label;
-    return a;
-  };
 
   function initThemeToggle() {
     const btn = $(".theme-toggle");
@@ -52,17 +19,21 @@
     };
     sync();
 
+    const toggle = () => {
+      const cur = document.documentElement.getAttribute("data-theme");
+      const next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      chosen = true;
+      try {
+        localStorage.setItem("theme", next);
+      } catch (_) {}
+      sync();
+    };
+
+    // Cross-fade the two palettes where supported and motion is welcome.
     btn.addEventListener("click", () => {
-      changeView(() => {
-        const cur = document.documentElement.getAttribute("data-theme");
-        const next = cur === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        chosen = true;
-        try {
-          localStorage.setItem("theme", next);
-        } catch (_) {}
-        sync();
-      });
+      if (reducedMotion.matches || !document.startViewTransition) toggle();
+      else document.startViewTransition(toggle);
     });
 
     // Follow OS theme changes mid-session, unless the user picked a theme.
@@ -232,199 +203,14 @@
     });
   }
 
-  function renderPublications(items, list) {
-    list.textContent = "";
-    if (!items.length) {
-      const li = document.createElement("li");
-      li.className = "empty-state";
-      li.textContent = "No publications yet.";
-      list.appendChild(li);
-      return;
-    }
-
-    const frag = document.createDocumentFragment();
-    items.forEach((p, idx) => {
-      const li = document.createElement("li");
-      // Stable, unique custom-ident so a paper shown by both filters morphs to its
-      // new position across a view transition instead of cross-fading. arXiv ids are
-      // unique; fall back to DOI, then the list index.
-      li.style.viewTransitionName =
-        "pub-" + (String(p.arxiv || p.doi || idx).replace(/[^\w-]/g, "") || idx);
-
-      const year = document.createElement("span");
-      year.className = "gutter";
-      year.textContent = String(p.year);
-
-      const title = document.createElement("span");
-      title.className = "pub__title";
-      title.textContent = p.title;
-
-      const authors = document.createElement("span");
-      authors.className = "pub__authors";
-      authors.textContent = p.authors;
-
-      const parts = [];
-      if (p.journal) parts.push(p.journal);
-      if (p.arxiv) parts.push(makeLink(p.arxiv, "arXiv"));
-      if (p.doi) parts.push(makeLink(p.doi, "DOI"));
-
-      const meta = document.createElement("span");
-      meta.className = "pub__meta";
-      parts.forEach((part, i) => {
-        if (i) meta.append(" · ");
-        meta.append(part);
-      });
-
-      const body = document.createElement("div");
-      body.append(title, authors, meta);
-
-      li.append(year, body);
-      frag.appendChild(li);
-    });
-    list.appendChild(frag);
-  }
-
-  async function initPublications() {
-    const list = $("[data-pub-list]");
-    const toggle = $("[data-pub-toggle]");
-    if (!list || !toggle) return;
-
-    let data;
-    try {
-      data = await loadJSON("src/data/publications.json");
-    } catch (err) {
-      console.error("Failed to load publications:", err);
-      list.textContent = "";
-      const li = document.createElement("li");
-      li.className = "empty-state";
-      li.append("Publications couldn't load. ", makeLink(
-        "https://inspirehep.net/authors/1706735", "View them on INSPIRE-HEP."
-      ));
-      list.appendChild(li);
-      return;
-    } finally {
-      list.removeAttribute("data-loading");
-    }
-
-    // arXiv IDs (YYMM.NNNNN) break ties within a year by recency, so "recent"
-    // stays correct regardless of the JSON's ordering.
-    const arxivKey = (p) => {
-      const m = String(p.arxiv || "").match(/(\d{4}\.\d{4,5})/);
-      return m ? m[1] : "";
-    };
-    data.sort((a, b) => b.year - a.year || arxivKey(b).localeCompare(arxivKey(a)));
-
-    const readUrl = () =>
-      new URLSearchParams(location.search).get("pub") === "all" ? "all" : "recent";
-
-    const writeUrl = () => {
-      const url = new URL(location.href);
-      if (mode === "all") url.searchParams.set("pub", "all");
-      else url.searchParams.delete("pub");
-      url.hash = "publications";
-      history.replaceState(null, "", url);
-    };
-
-    let mode = readUrl();
-
-    const applyFilter = () => {
-      const all = mode === "all";
-      renderPublications(all ? data : data.slice(0, 3), list);
-      toggle.textContent = all ? "Show fewer" : "Show all";
-      toggle.setAttribute("aria-expanded", String(all));
-    };
-
-    toggle.addEventListener("click", () => {
-      changeView(() => {
-        mode = mode === "all" ? "recent" : "all";
-        writeUrl();
-        applyFilter();
-      }, "pub");
-    });
-
-    applyFilter();
-    toggle.parentElement.hidden = data.length <= 3;
-  }
-
-  async function initProjects() {
-    const list = $("[data-project-list]");
-    if (!list) return;
-
-    let data;
-    try {
-      data = await loadJSON("src/data/projects.json");
-    } catch (err) {
-      console.error("Failed to load projects:", err);
-      list.textContent = "";
-      const li = document.createElement("li");
-      li.className = "empty-state";
-      li.textContent = "Projects couldn't load.";
-      list.appendChild(li);
-      return;
-    } finally {
-      list.removeAttribute("data-loading");
-    }
-
-    data.sort((a, b) => b.year - a.year || String(a.name).localeCompare(String(b.name)));
-
-    list.textContent = "";
-    const frag = document.createDocumentFragment();
-    data.forEach((p) => {
-      const li = document.createElement("li");
-
-      const name = document.createElement("span");
-      name.className = "gutter";
-      name.appendChild(makeLink(p.url, p.name));
-
-      const description = document.createElement("span");
-      description.textContent = p.description;
-
-      li.append(name, description);
-      frag.appendChild(li);
-    });
-    list.appendChild(frag);
-  }
-
-  async function initInterests() {
-    const list = $("[data-interests]");
-    if (!list) return;
-
-    let data;
-    try {
-      data = await loadJSON("src/data/interests.json");
-    } catch (err) {
-      console.error("Failed to load interests:", err);
-      list.textContent = "";
-      const li = document.createElement("li");
-      li.className = "empty-state";
-      li.textContent = "Interests couldn't load.";
-      list.appendChild(li);
-      return;
-    } finally {
-      list.removeAttribute("data-loading");
-    }
-
-    list.textContent = "";
-    const frag = document.createDocumentFragment();
-    Object.entries(data)
-      .filter(([, items]) => items.length)
-      .forEach(([label, items]) => {
-        const li = document.createElement("li");
-        const name = document.createElement("span");
-        name.className = "gutter";
-        name.textContent = label;
-        const values = document.createElement("span");
-        values.textContent = items.join(", ");
-        li.append(name, values);
-        frag.appendChild(li);
-      });
-    list.appendChild(frag);
+  // The publication list is rendered at build time; `?pub=all` opens the full list.
+  function initPublications() {
+    const more = $("[data-pub-more]");
+    if (more && new URLSearchParams(location.search).get("pub") === "all") more.open = true;
   }
 
   initThemeToggle();
   initField();
   initContact();
   initPublications();
-  initProjects();
-  initInterests();
 })();
