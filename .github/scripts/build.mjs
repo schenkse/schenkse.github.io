@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Render the content lists from src/data/*.json into index.html and write the
-// deployable site to _site/, using Node built-ins only.
+// deployable site to _site/, using Node built-ins only. Data and design
+// sources (src/data, og-image.svg) stay in the repo but aren't deployed.
 
 import { readFileSync, writeFileSync, rmSync, mkdirSync, cpSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -106,9 +107,10 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out);
 writeFileSync(join(out, "index.html"), html);
 for (const file of ["404.html", "robots.txt", "sitemap.xml"]) cpSync(join(root, file), join(out, file));
+const skip = [join(root, "src", "data"), join(root, "src", "assets", "og-image.svg")];
 cpSync(join(root, "src"), join(out, "src"), {
   recursive: true,
-  filter: (src) => src !== join(root, "src", "data"),
+  filter: (src) => !skip.includes(src),
 });
 
 console.log("✓ Built _site/");
