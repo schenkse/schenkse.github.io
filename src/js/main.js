@@ -194,12 +194,12 @@
 
     document.querySelectorAll("[data-email]").forEach((el) => {
       el.setAttribute("href", "mailto:" + email);
-      el.setAttribute("rel", "me noopener");
+      el.setAttribute("rel", "me");
     });
 
     document.querySelectorAll("[data-matrix]").forEach((el) => {
       el.setAttribute("href", "https://matrix.to/#/" + encodeURIComponent(matrixHandle));
-      el.setAttribute("rel", "me noopener");
+      el.setAttribute("rel", "me");
     });
   }
 

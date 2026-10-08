@@ -22,7 +22,7 @@ const escape = (s) =>
     .replace(/"/g, "&quot;");
 
 const link = (href, label) =>
-  `<a href="${escape(href)}" rel="noopener">${escape(label)}</a>`;
+  `<a href="${escape(href)}">${escape(label)}</a>`;
 
 // arXiv IDs (YYMM.NNNNN) break ties within a year by recency, so "recent"
 // stays correct regardless of the JSON's ordering.
