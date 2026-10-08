@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
     />
     <title>Sebastian Schenk</title>
     <meta
@@ -101,32 +101,16 @@
       </ol>
 
       <h2 id="publications">Publications</h2>
-      <ol class="pubs" role="list" data-pub-list data-loading>
-        <li class="empty-state">
-          <span class="loading-message">Loading publications…</span>
-          <noscript><a href="https://inspirehep.net/authors/1706735">View publications on INSPIRE-HEP.</a></noscript>
-        </li>
-      </ol>
-      <p class="pub-more" hidden>
-        <button class="filter" type="button" data-pub-toggle aria-expanded="false">
-          Show all
-        </button>
-      </p>
+      <!-- build:publications -->
 
       <h2 id="code">Code</h2>
-      <ul class="repos" role="list" data-project-list data-loading>
-        <li class="empty-state">
-          <span class="loading-message">Loading projects…</span>
-          <noscript><a href="https://github.com/schenkse">View projects on GitHub.</a></noscript>
-        </li>
+      <ul class="repos" role="list">
+        <!-- build:projects -->
       </ul>
 
       <h2 id="interests">Interests</h2>
-      <ul class="interests" role="list" data-interests data-loading>
-        <li class="empty-state">
-          <span class="loading-message">Loading interests…</span>
-          <noscript>Enable JavaScript to view interests.</noscript>
-        </li>
+      <ul class="interests" role="list">
+        <!-- build:interests -->
       </ul>
 
       <footer class="foot">
