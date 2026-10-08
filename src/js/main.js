@@ -49,10 +49,10 @@
     });
   }
 
-  function initField() {
+  function initInterferencePlate() {
     const band = $("[data-field]");
-    const cv = band && $("canvas", band);
-    const ctx = cv && cv.getContext && cv.getContext("2d");
+    const canvas = band && $("canvas", band);
+    const ctx = canvas && canvas.getContext("2d");
     if (!ctx) return;
 
     const STEP = 13;       // lattice spacing, px
@@ -66,13 +66,13 @@
     let frame = 0;
     let resizeFrame = 0;
     let lastTime = 0;
-    let cur = [0, 0, 0, 0];  // [x1, y1, x2, y2], current
-    let tgt = [0, 0, 0, 0];  // [x1, y1, x2, y2], eased toward
+    let sources = [0, 0, 0, 0];  // [x1, y1, x2, y2], current
+    let targetSources = [0, 0, 0, 0];  // [x1, y1, x2, y2], eased toward
 
     const home = () => [w * 0.34, h * 0.44, w * 0.68, h * 0.52];
 
     const readPalette = () => {
-      const cs = getComputedStyle(cv);
+      const cs = getComputedStyle(canvas);
       palette = {
         bright: cs.getPropertyValue("--accent").trim(),
         dim: cs.getPropertyValue("--text").trim(),
@@ -81,15 +81,15 @@
     };
 
     const resize = () => {
-      const width = Math.max(1, cv.offsetWidth);
-      const height = Math.max(1, cv.offsetHeight);
+      const width = Math.max(1, canvas.offsetWidth);
+      const height = Math.max(1, canvas.offsetHeight);
       const scale = Math.min(2, window.devicePixelRatio || 1);
       if (w === width && h === height && dpr === scale) return false;
       w = width;
       h = height;
       dpr = scale;
-      cv.width = Math.round(w * dpr);
-      cv.height = Math.round(h * dpr);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       return true;
     };
@@ -100,8 +100,8 @@
       for (let y = STEP / 2; y < h; y += STEP) {
         for (let x = STEP / 2; x < w; x += STEP) {
           const amplitude =
-            Math.cos(K * Math.hypot(x - cur[0], y - cur[1])) +
-            Math.cos(K * Math.hypot(x - cur[2], y - cur[3]));
+            Math.cos(K * Math.hypot(x - sources[0], y - sources[1])) +
+            Math.cos(K * Math.hypot(x - sources[2], y - sources[3]));
           const intensity = (amplitude * amplitude) / 4;
           if (intensity < 0.02) continue;
           const size = Math.max(1, intensity * (STEP - 4));
@@ -120,8 +120,8 @@
       lastTime = time;
       let far = 0;
       for (let i = 0; i < 4; i++) {
-        cur[i] += (tgt[i] - cur[i]) * ease;
-        far = Math.max(far, Math.abs(tgt[i] - cur[i]));
+        sources[i] += (targetSources[i] - sources[i]) * ease;
+        far = Math.max(far, Math.abs(targetSources[i] - sources[i]));
       }
       draw();
       frame = far > 0.4 ? requestAnimationFrame(tick) : 0;
@@ -136,8 +136,8 @@
     const reset = () => {
       cancelAnimationFrame(frame);
       frame = 0;
-      cur = home();
-      tgt = home();
+      sources = home();
+      targetSources = home();
       draw();
     };
 
@@ -163,12 +163,12 @@
     });
     band.addEventListener("pointermove", (e) => {
       if (reducedMotion.matches) return;
-      const r = cv.getBoundingClientRect();
+      const r = canvas.getBoundingClientRect();
       if (!r.width || !r.height) return;
       const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
       const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
       const at = home();
-      tgt = [
+      targetSources = [
         at[0] + nx * REACH,
         at[1] + ny * (REACH * 0.63),
         at[2] - nx * REACH,
@@ -177,7 +177,7 @@
       kick();
     });
     band.addEventListener("pointerleave", () => {
-      tgt = home();
+      targetSources = home();
       kick();
     });
   }
@@ -194,12 +194,12 @@
 
     document.querySelectorAll("[data-email]").forEach((el) => {
       el.setAttribute("href", "mailto:" + email);
-      el.setAttribute("rel", "me noopener");
+      el.setAttribute("rel", "me");
     });
 
     document.querySelectorAll("[data-matrix]").forEach((el) => {
       el.setAttribute("href", "https://matrix.to/#/" + encodeURIComponent(matrixHandle));
-      el.setAttribute("rel", "me noopener");
+      el.setAttribute("rel", "me");
     });
   }
 
@@ -210,7 +210,7 @@
   }
 
   initThemeToggle();
-  initField();
+  initInterferencePlate();
   initContact();
   initPublications();
 })();
