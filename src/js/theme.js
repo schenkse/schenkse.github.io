@@ -1,16 +1,11 @@
-// Runs before paint to avoid a theme flash; an external file keeps CSP strict.
+// Applies a stored light/dark override before paint, avoiding a flash; an
+// external file keeps CSP strict. Without one, CSS follows the OS preference.
 (function () {
   let stored;
   try {
     stored = localStorage.getItem("theme");
   } catch (_) {}
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = stored === "light" || stored === "dark"
-    ? stored
-    : prefersDark ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", theme);
-  const themeColor = document.querySelector('meta[name="theme-color"]');
-  if (themeColor) {
-    themeColor.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  if (stored === "light" || stored === "dark") {
+    document.documentElement.setAttribute("data-theme", stored);
   }
 })();
