@@ -36,9 +36,11 @@ In page order.
 * **Interests** — anything that may be useful in the tech world
 
 ## Key JS behaviors (main.js)
-* **Theme** — dark/light toggle in the footer; reads OS preference; applied
-  before render by `theme.js` to avoid a flash. The switch cross-fades the two
-  palettes over a short view transition.
+* **Theme** — CSS follows the OS preference. The footer switch stores a
+  light/dark override only while it differs from the OS, so toggling back
+  returns to System. `theme.js` applies a stored override before paint to
+  avoid a flash. The switch stays hidden until `main.js` has wired it, and
+  cross-fades the two palettes over a short view transition.
 * **Interference plate** — two coherent sources drawn on a lattice in the page's
   own two inks. Follows the pointer, eases to a stop, and renders nothing
   further while idle; responds to live `prefers-reduced-motion` changes.

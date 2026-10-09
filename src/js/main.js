@@ -4,28 +4,37 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+  // `data-theme` is a manual override, kept only while it differs from the OS;
+  // toggling back to the OS theme clears it.
   function initThemeToggle() {
     const btn = $(".theme-toggle");
     if (!btn) return;
-    let chosen = false;
+    const root = document.documentElement;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const isDark = () => {
+      const theme = root.getAttribute("data-theme");
+      return theme ? theme === "dark" : media.matches;
+    };
 
     const sync = () => {
-      const dark = document.documentElement.getAttribute("data-theme") === "dark";
-      btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
-      const themeColor = $('meta[name="theme-color"]');
-      if (themeColor) {
-        themeColor.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-      }
+      btn.setAttribute("aria-label", isDark() ? "Switch to light theme" : "Switch to dark theme");
+      const bg = getComputedStyle(root).getPropertyValue("--bg").trim();
+      document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+        meta.content = bg;
+      });
     };
     sync();
 
     const toggle = () => {
-      const cur = document.documentElement.getAttribute("data-theme");
-      const next = cur === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      chosen = true;
+      const next = isDark() ? "light" : "dark";
       try {
-        localStorage.setItem("theme", next);
+        if ((next === "dark") === media.matches) {
+          root.removeAttribute("data-theme");
+          localStorage.removeItem("theme");
+        } else {
+          root.setAttribute("data-theme", next);
+          localStorage.setItem("theme", next);
+        }
       } catch (_) {}
       sync();
     };
@@ -36,17 +45,9 @@
       else document.startViewTransition(toggle);
     });
 
-    // Follow OS theme changes mid-session, unless the user picked a theme.
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    media.addEventListener("change", (e) => {
-      let stored = null;
-      try {
-        stored = localStorage.getItem("theme");
-      } catch (_) {}
-      if (chosen || stored === "light" || stored === "dark") return;
-      document.documentElement.setAttribute("data-theme", e.matches ? "dark" : "light");
-      sync();
-    });
+    // CSS follows OS changes on its own; keep the label and theme-color in step.
+    media.addEventListener("change", sync);
+    btn.hidden = false;
   }
 
   function initInterferencePlate() {
@@ -153,14 +154,16 @@
     });
     reducedMotion.addEventListener("change", reset);
     // At rest there is no next frame to pick up new token values, so a theme
-    // change has to repaint the plate explicitly.
-    new MutationObserver(() => {
+    // change, by the switch or the OS, has to repaint the plate explicitly.
+    const repaint = () => {
       readPalette();
       draw();
-    }).observe(document.documentElement, {
+    };
+    new MutationObserver(repaint).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint);
     band.addEventListener("pointermove", (e) => {
       if (reducedMotion.matches) return;
       const r = canvas.getBoundingClientRect();
@@ -209,8 +212,11 @@
     if (more && new URLSearchParams(location.search).get("pub") === "all") more.open = true;
   }
 
-  initThemeToggle();
-  initInterferencePlate();
+  // Essentials first; the plate is decorative, so a failure there stays contained.
   initContact();
   initPublications();
+  initThemeToggle();
+  try {
+    initInterferencePlate();
+  } catch (_) {}
 })();

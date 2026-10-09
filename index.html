@@ -13,7 +13,8 @@
       content="Personal site of Sebastian Schenk: theoretical physicist and quantum mechanic. Publications, projects, and ways to get in touch."
     />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#fdfdfc" />
+    <meta name="theme-color" content="#fdfdfc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131314" media="(prefers-color-scheme: dark)" />
 
     <link rel="canonical" href="https://schenkse.github.io/" />
 
@@ -117,6 +118,7 @@
         <span>Updated <time datetime="2026-10">October 2026</time></span>
         <button
           class="theme-toggle"
+          hidden
           type="button"
           aria-label="Switch to dark theme"
         >
