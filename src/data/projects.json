@@ -1,7 +1,7 @@
 [
   {
     "name": "peerreview",
-    "description": "Visualize academic co-authorship networks for any researcher indexed on InspireHEP.",
+    "description": "Visualize academic co-authorship networks for any researcher indexed on INSPIRE.",
     "url": "https://github.com/schenkse/peerreview",
     "year": 2026
   },
@@ -25,7 +25,7 @@
   },
   {
     "name": "conway-gol",
-    "description": "A simple implementation of Conway's Game of Life written in javascript.",
+    "description": "A simple implementation of Conway's Game of Life written in JavaScript.",
     "url": "https://github.com/schenkse/conway-gol",
     "year": 2025
   }
