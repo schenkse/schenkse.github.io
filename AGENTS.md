@@ -58,6 +58,8 @@ In page order.
   after editing data or HTML. Preview from `_site/`
   (`python3 -m http.server -d _site`); the source `index.html` only holds
   `<!-- build:… -->` markers where the lists go.
+* External links open in a new tab (`target="_blank"`); `link()` in
+  `build.mjs` adds it for data links. The `mailto:` link stays in the tab.
 * Data links must be full HTTPS URLs, checked by CI. Escape all data text with
   `escape()` in `build.mjs`, and keep publication authors as a string and the
   venue in `journal`.
