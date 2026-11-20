@@ -203,6 +203,7 @@
     document.querySelectorAll("[data-matrix]").forEach((el) => {
       el.setAttribute("href", "https://matrix.to/#/" + encodeURIComponent(matrixHandle));
       el.setAttribute("rel", "me");
+      el.setAttribute("target", "_blank");
     });
   }
 
